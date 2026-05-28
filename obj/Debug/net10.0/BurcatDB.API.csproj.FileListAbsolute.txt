@@ -1,0 +1,16 @@
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\bin\Debug\net10.0\BurcatDB.API.deps.json
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\bin\Debug\net10.0\BurcatDB.API.dll
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\bin\Debug\net10.0\BurcatDB.API.pdb
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.csproj.AssemblyReference.cache
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.AssemblyInfoInputs.cache
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.AssemblyInfo.cs
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.csproj.CoreCompileInputs.cache
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.sourcelink.json
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.dll
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\refint\BurcatDB.API.dll
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.API.pdb
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\ref\BurcatDB.API.dll
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\bin\Debug\net10.0\BurcatProtocol.dll
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\bin\Debug\net10.0\BurcatProtocol.pdb
+C:\Users\eloic\source\repos\Burcat\BurcatDB.API\obj\Debug\net10.0\BurcatDB.A75EEF6E.Up2Date

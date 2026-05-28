@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "XedcwjIaqMA=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\eloic\\source\\repos\\Burcat\\BurcatDB.API\\Burcat.API.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\eloic\\.nuget\\packages\\ffmpegcore\\5.4.0\\ffmpegcore.5.4.0.nupkg.sha512",
+    "C:\\Users\\eloic\\.nuget\\packages\\instances\\3.0.2\\instances.3.0.2.nupkg.sha512",
+    "C:\\Users\\eloic\\.nuget\\packages\\sixlabors.imagesharp\\3.1.12\\sixlabors.imagesharp.3.1.12.nupkg.sha512"
+  ],
+  "logs": []
+}

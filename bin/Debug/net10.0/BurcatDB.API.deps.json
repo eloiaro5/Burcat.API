@@ -1,0 +1,39 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v10.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v10.0": {
+      "BurcatDB.API/1.0.0": {
+        "dependencies": {
+          "BurcatProtocol": "1.0.0"
+        },
+        "runtime": {
+          "BurcatDB.API.dll": {}
+        }
+      },
+      "BurcatProtocol/1.0.0": {
+        "runtime": {
+          "BurcatProtocol.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "BurcatDB.API/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "BurcatProtocol/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
