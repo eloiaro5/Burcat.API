@@ -22,7 +22,9 @@ namespace Burcat.API
 
         public Pseudonym(BurcatIdentifier<Member> owner, string value, BurcatIdentifier<Politeness> politeness) { Owner = owner; Value = value; Politeness = politeness; }
 
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
+
         public override object?[] GetBurcatConstructionValues() => [Owner, Value, Politeness];
     }
 }

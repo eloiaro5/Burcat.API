@@ -9,6 +9,8 @@ namespace Burcat.API
     public interface IInterfaceObject : IBurcatObject
     {
         [NotBurcatInvokable]
+        bool ShouldCreate(BurcatIdentifier<Member>? member) => false;
+        [NotBurcatInvokable]
         bool ShouldManage(BurcatIdentifier<Member>? member);
     }
 }

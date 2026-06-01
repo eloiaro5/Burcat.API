@@ -65,7 +65,7 @@ namespace Burcat.API
             return politeness;
         }
 
-        public static Politeness? GetByName(BurcatIdentifier<Member> owner, string name) => (from p in InterfaceOptions.GetSingleUse<Politeness>() where p.Owner == owner && p.Name == name select p).FirstOrDefault();
+        public static Politeness? GetByName(BurcatIdentifier<Member> owner, string name) => InterfaceOptions.UseProvider(provider => (from p in provider.Get<Politeness>() where p.Owner == owner && p.Name == name select p).FirstOrDefault());
 
         public BurcatIdentifier<Member> Owner { get; }
         [Length(1, 64)]
@@ -93,7 +93,9 @@ namespace Burcat.API
         }
         public override int GetHashCode() => HashCode.Combine(Language, Racism, Sexuality, Violence);
 
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
+
         public override object?[] GetBurcatConstructionValues() => [Owner, Name, Language, Racism, Sexuality, Violence];
 
         public static bool operator ==(Politeness? a, Politeness? b) => (a is null && b is null) || (a is not null && b is not null && a.Language == b.Language && a.Racism == b.Racism && a.Sexuality == b.Sexuality && a.Violence == b.Violence);

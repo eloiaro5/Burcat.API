@@ -1,4 +1,4 @@
-﻿using Burcat.API.Media;
+﻿﻿using Burcat.API.Media;
 using Burcat.API.System;
 using BurcatProtocol;
 using System;
@@ -11,8 +11,15 @@ namespace Burcat.API
 {
     public static partial class DataValidator
     {
-        public static ValidationResult? ValidateMessagePost(MessagePost post) => post.ResponseTo is not null && post.ResponseTo.Value.Value == post.Identifier ? new("Cannot respond to the same message.") : ValidationResult.Success;
-        public static ValidationResult? ValidateImagePost(ImagePost post) => (from i in InterfaceOptions.GetSingleUse<Image>() where i.Identifier == (Guid)post.Image select (Guid)i.Politeness).FirstOrDefault() == (Guid)post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success;
+        public static ValidationResult? ValidateMessagePost(MessagePost post)
+        {
+            if (post.ResponseTo is not null && post.ResponseTo.Value.Value == post.Identifier) return new("Cannot respond to the same message.");
+            else if (post.Image is not null && post.Video is not null) return new("Cannot create a message with an image and a video attached.");
+            else if (post.Image is BurcatIdentifier<Image> image && InterfaceOptions.Find(image).Politeness != post.Politeness) return new("Cannot create a post where the post and the image have distinct politenesses.");
+            else if (post.Video is BurcatIdentifier<Video> video && InterfaceOptions.Find(video).Politeness != post.Politeness) return new("Cannot create a post where the post and the image have distinct politenesses.");
+            else return ValidationResult.Success;
+        }
+        public static ValidationResult? ValidateImagePost(ImagePost post) => InterfaceOptions.UseProvider(provider => (from i in provider.Get<Image>() where i.Identifier == (Guid)post.Image select (Guid)i.Politeness).FirstOrDefault() == (Guid)post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success);
         public static ValidationResult? ValidatePostTags(string? tags)
         {
             if (tags is null) return ValidationResult.Success;
@@ -22,11 +29,11 @@ namespace Burcat.API
             else return ValidationResult.Success;
         }
 
-        public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => post.MaximumPoliteness is not null &&
-            (from p in InterfaceOptions.GetSingleUse<Politeness>() where p == post.MaximumPoliteness select p).First()
+        public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => InterfaceOptions.UseProvider(provider => post.MaximumPoliteness is not null &&
+            (from p in provider.Get<Politeness>() where p == post.MaximumPoliteness select p).First()
             <
-            (from pt in InterfaceOptions.GetSingleUse<IPost>() join p in InterfaceOptions.GetSingleUse<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pt.Identifier == post.Identifier select p).First()
-            ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success;
+            (from pt in provider.Get<IPost>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pt.Identifier == post.Identifier select p).First()
+            ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success);
         
         public static ValidationResult? ValidatePostReactionReaction(string reaction)
         {

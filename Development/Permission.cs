@@ -52,7 +52,7 @@ namespace Burcat.API.Development
             return hashCode.ToHashCode();
         }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from d in InterfaceOptions.GetSingleUse<DevelopStatus>() where d == Creator && d.Member == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == Creator && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Customizable];
 
         public static bool operator ==(Permission a, Permission b) => a.Customizable == b.Customizable && a.CanPost == b.CanPost && a.CanReadConfidentialData == b.CanReadConfidentialData && a.CanSpend == b.CanSpend && a.CanMangeIcons == b.CanMangeIcons && a.CanManageAlias == b.CanManageAlias && a.CanManageAvatars == b.CanManageAvatars && a.CanManageGroups == b.CanManageGroups && a.CanManageAuctions == b.CanManageAuctions && a.CanManageCards == b.CanManageCards;

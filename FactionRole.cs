@@ -29,25 +29,14 @@ namespace Burcat.API
 
         public FactionRole(BurcatIdentifier<Faction> faction, int level, string name) { Faction = faction; Level = level; Name = name; }
 
-        public SortedListSet<Member> GetMembersWithRole() => [..
-            from r in InterfaceOptions.GetSingleUse<MemberFactionRole>()
-            join a in InterfaceOptions.GetSingleUse<Member>() on (Guid)r.Member equals a.Identifier
-            where r.Role == this select a];
+        public SortedListSet<Member> GetMembersWithRole() => InterfaceOptions.UseProvider(provider => (SortedListSet<Member>)[..
+            from fm in provider.Get<FactionMembership>()
+            join m in provider.Get<Member>() on (Guid)fm.Member equals m.Identifier
+            where fm.Role == this select m]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from ar in InterfaceOptions.GetSingleUse<MemberFactionRole>() join fr in InterfaceOptions.GetSingleUse<FactionRole>() on (Guid)ar.Role equals fr.Identifier where ar.Member == member && fr.Faction == Faction && fr.Level <= Level && fr.CanManageRoles == true select true).Any();
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction && r.Level <= Level && r.CanManageRoles == true select true).Any()));
+
         public override object?[] GetBurcatConstructionValues() => [Faction, Level, Name];
-    }
-
-    [BurcatIdentity("f9ceb1d2-7439-4498-95f3-4758d9902cc6")]
-    [BurcatUnique(nameof(Role), nameof(Member))]
-    public class MemberFactionRole : BurcatObject, IInterfaceObject
-    {
-        public BurcatIdentifier<Member> Member { get; }
-        public BurcatIdentifier<FactionRole> Role { get; }
-
-        public MemberFactionRole(BurcatIdentifier<Member> member, BurcatIdentifier<FactionRole> role) { Member = member; Role = role; }
-
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => true;//member is not null && (from ar in InterfaceOptions.Get<MemberFactionRole>() join fr in InterfaceOptions.Get<FactionRole>() on (Guid)ar.Role equals fr.Identifier where ar.Member == member.Identifier && ar.Faction == Faction && fr.Level <= Level && fr.CanManageRoles == true select true).Any();
-        public override object?[] GetBurcatConstructionValues() => [Member, Role];
     }
 }

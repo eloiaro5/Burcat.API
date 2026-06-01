@@ -18,49 +18,25 @@ namespace Burcat.API.Media
 
         public AdvertisementPost(BurcatIdentifier<IPost> post, decimal payment, BurcatIdentifier<Politeness>? maximumPoliteness = null) { Post = post; Payment = payment; MaximumPoliteness = maximumPoliteness; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from p in InterfaceOptions.GetSingleUse<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Post, Payment];
     }
 
-    [BurcatIdentity("bf9c2227-b561-4947-8c78-228ec597d12b")]
-    [BurcatUnique(nameof(Post), nameof(Image))]
-    public class MessagePostImage : BurcatObject, IInterfaceObject
-    {
-        public BurcatIdentifier<MessagePost> Post { get; }
-        public BurcatIdentifier<Image> Image { get; }
-
-        public MessagePostImage(BurcatIdentifier<MessagePost> post, BurcatIdentifier<Image> image) { Post = post; Image = image; }
-
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from p in InterfaceOptions.GetSingleUse<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any();
-        public override object?[] GetBurcatConstructionValues() => [Post, Image];
-    }
-
-    [BurcatIdentity("0c31c450-2a86-46cf-bb70-96dc95290a88")]
-    [BurcatUnique(nameof(Post), nameof(Video))]
-    public class MessagePostVideo : BurcatObject, IInterfaceObject
-    {
-        public BurcatIdentifier<MessagePost> Post { get; }
-        public BurcatIdentifier<Video> Video { get; }
-
-        public MessagePostVideo(BurcatIdentifier<MessagePost> post, BurcatIdentifier<Video> video) { Post = post; Video = video; }
-
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from p in InterfaceOptions.GetSingleUse<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any();
-        public override object?[] GetBurcatConstructionValues() => [Post, Video];
-    }
-
     [BurcatIdentity("9d538f8b-a29b-42cd-88c5-452673e24dfa")]
-    [BurcatUnique(nameof(Post), nameof(To))]
+    [BurcatUnique(nameof(Post), nameof(Faction))]
     public class PostRepost : BurcatObject, IInterfaceObject
     {
         public BurcatIdentifier<IPost> Post { get; }
-        public BurcatIdentifier<Faction> To { get; }
+        public BurcatIdentifier<Faction> Faction { get; }
         [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateDateEqualOrUnderNow))]
         public DateTime RepostedIn { get; }
 
-        public PostRepost(BurcatIdentifier<IPost> post, BurcatIdentifier<Faction> to, DateTime? repostedIn = null) { Post = post; To = to; RepostedIn = repostedIn ?? DateTime.Now; }
+        public PostRepost(BurcatIdentifier<IPost> post, BurcatIdentifier<Faction> faction, DateTime repostedIn = default) { Post = post; Faction = faction; RepostedIn = repostedIn == default ? DateTime.Now : repostedIn; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from p in InterfaceOptions.GetSingleUse<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any();
-        public override object?[] GetBurcatConstructionValues() => [Post, To, RepostedIn];
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && (InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction select r.CanPost).FirstOrDefault()));
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction select r.CanManagePosts).FirstOrDefault()));
+        
+        public override object?[] GetBurcatConstructionValues() => [Post, Faction, RepostedIn];
     }
 
     [BurcatIdentity("2ba6721c-c62f-40e7-a911-bdadcafe27ff")]
@@ -87,7 +63,7 @@ namespace Burcat.API.Media
 
         public PostCollaboration(BurcatIdentifier<IPost> about, BurcatIdentifier<Member> with) { Post = about; With = with; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from p in InterfaceOptions.GetSingleUse<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Post, With];
     }
 }

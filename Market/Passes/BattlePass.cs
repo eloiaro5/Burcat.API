@@ -31,7 +31,7 @@ namespace Burcat.API.Market.Passes
         public BattlePass(string name, Image icon, decimal price, DateTime endTime) : this(name, icon, price) { EndTime = endTime; }
         public BattlePass(string name, Image icon, decimal price, string description, DateTime endTime) : this(name, icon, price, description) { EndTime = endTime; }
 
-        public ListSet<Mission> GetMissions() => [.. InterfaceOptions.GetSingleUse<Mission>().Where(m => m.Pass == this)];
+        public ListSet<Mission> GetMissions() => InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. provider.Get<Mission>().Where(m => m.Pass == this)]);
 
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name, Icon, Price];
@@ -66,13 +66,13 @@ namespace Burcat.API.Market.Passes
 
         public ListSet<Mission> GetAvaliableMissions()
         {
-            return [.. 
-                from mission in InterfaceOptions.GetSingleUse<Mission>().Where(m => m.Pass == Pass)
-                let dependencies = InterfaceOptions.GetSingleUse<MissionDependency>().Where(d => d.Mission == mission).Select(d => d.DependsOn)
-                let completions = InterfaceOptions.GetSingleUse<MissionCompletion>().Where(c => c.Entry == this).Select(c => c.Mission)
+            return InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. 
+                from mission in provider.Get<Mission>().Where(m => m.Pass == Pass)
+                let dependencies = provider.Get<MissionDependency>().Where(d => d.Mission == mission).Select(d => d.DependsOn)
+                let completions = provider.Get<MissionCompletion>().Where(c => c.Entry == this).Select(c => c.Mission)
                 where dependencies.All(d => completions.Contains(d))
                 select mission
-            ];
+            ]);
         }
 
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;

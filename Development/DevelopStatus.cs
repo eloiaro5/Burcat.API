@@ -24,7 +24,7 @@ namespace Burcat.API.Development
     [BurcatUnique(nameof(Member))]
     public class DevelopStatus : BurcatObject, IInterfaceObject
     {
-        public static DevelopStatusType? GetDevelopType(BurcatIdentifier<Member> member) => (from d in InterfaceOptions.GetSingleUse<DevelopStatus>() where d.Member == member select d.Type).FirstOrDefault();
+        public static DevelopStatusType? GetDevelopType(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d.Member == member select d.Type).FirstOrDefault());
 
         public BurcatIdentifier<Member> Member { get; }
         public DevelopStatusType Type { get; set; }

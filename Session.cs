@@ -12,7 +12,7 @@ namespace Burcat.API
     [BurcatUnique(nameof(Token))]
     public abstract class Session : BurcatObject, IInterfaceObject
     {
-        public static Session? GetSession(string token) => (from s in InterfaceOptions.GetSingleUse<Session>() where s.Token == token select s).FirstOrDefault();
+        public static Session? GetSession(string token) => InterfaceOptions.UseProvider(provider => (from s in provider.Get<Session>() where s.Token == token select s).FirstOrDefault());
 
         public BurcatIdentifier<Member> Owner { get; }
         [Length(24, 24)]
@@ -24,7 +24,9 @@ namespace Burcat.API
 
         public abstract void Logout();
 
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => true;
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
+
         public override object?[] GetBurcatConstructionValues() => [Owner, Token, EndTime];
     }
 }

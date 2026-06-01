@@ -24,7 +24,7 @@ namespace Burcat.API.Market.Trading
         public Auction(BurcatIdentifier<IOwnership> madeOver, int amount) : this(madeOver, amount, null, null) {  }
         public Auction(BurcatIdentifier<IOwnership> madeOver, int amount, decimal? participationPrice = null, DateTime? endTime = null) { MadeOver = madeOver; Amount = amount; ParticipationPrice = participationPrice; EndTime = endTime; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from o in InterfaceOptions.GetSingleUse<IOwnership>() where o.Identifier == (Guid)MadeOver && o.Owner == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from o in provider.Get<IOwnership>() where o.Identifier == (Guid)MadeOver && o.Owner == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [MadeOver, Amount];
     }
 
@@ -41,7 +41,7 @@ namespace Burcat.API.Market.Trading
 
         public CurrencyParticipationPrice(Auction auction, Currency currency, int amount) { Auction = auction; Currency = currency; Amount = amount; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.GetSingleUse<Auction>() join o in InterfaceOptions.GetSingleUse<IOwnership>() on (Guid)a.MadeOver equals o.Identifier where a == Auction && o.Owner == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Auction>() join o in provider.Get<IOwnership>() on (Guid)a.MadeOver equals o.Identifier where a == Auction && o.Owner == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Auction, Currency, Amount];
     }
 }

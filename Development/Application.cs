@@ -28,7 +28,7 @@ namespace Burcat.API.Development
 
         //public ListSet<Development> GetDevelopers() => [.. from c in InterfaceConfiguration.Provider.GetQueryable<ApplicationCollaboration>(this) where c.Application == this select c.With]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from d in InterfaceOptions.GetSingleUse<DevelopStatus>() where d == Creator && d.Member == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == Creator && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Creator, Name, Icon, Requirements];
     }
 
@@ -40,12 +40,12 @@ namespace Burcat.API.Development
         public BurcatIdentifier<Application> Application { get; }
         public BurcatIdentifier<DevelopStatus> With { get; }
 
-        BurcatIdentifier<Member> ICollaboration.With => (from d in InterfaceOptions.GetSingleUse<DevelopStatus>() where d == With select d.Member).First();
+        BurcatIdentifier<Member> ICollaboration.With => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == With select d.Member).First());
         BurcatIdentifier<ICollaborative> ICollaboration.About => Application.Downcast<ICollaborative>();
 
         public ApplicationCollaboration(BurcatIdentifier<Application> application, BurcatIdentifier<DevelopStatus> with) { Application = application; With = with; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.GetSingleUse<Application>() join d in InterfaceOptions.GetSingleUse<DevelopStatus>() on (Guid)a.Creator equals d.Identifier where a == Application && d.Member == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Application>() join d in provider.Get<DevelopStatus>() on (Guid)a.Creator equals d.Identifier where a == Application && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Application, With];
     }
 }

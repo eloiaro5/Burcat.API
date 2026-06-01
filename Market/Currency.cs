@@ -24,7 +24,7 @@ namespace Burcat.API.Market
         public Currency(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon) { Creator = creator; Name = name; Icon = icon; }
         public Currency(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon, string description) : this(creator, name, icon) { Description = description; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from s in InterfaceOptions.GetSingleUse<DevelopStatus>() where s == Creator && s.Member == member select true).Any();
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from s in provider.Get<DevelopStatus>() where s == Creator && s.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Creator, Name, Icon];
     }
 
