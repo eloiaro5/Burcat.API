@@ -18,7 +18,7 @@ namespace Burcat.API.Media
 
         public AdvertisementPost(BurcatIdentifier<IPost> post, decimal payment, BurcatIdentifier<Politeness>? maximumPoliteness = null) { Post = post; Payment = payment; MaximumPoliteness = maximumPoliteness; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any());
+        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == Post.Value && p.Owner == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Post, Payment];
     }
 
@@ -26,6 +26,17 @@ namespace Burcat.API.Media
     [BurcatUnique(nameof(Post), nameof(Faction))]
     public class PostRepost : BurcatObject, IInterfaceObject
     {
+        public static BurcatList<PostRepostResponse> GetReposts(IPost post)
+        {
+            BurcatList<PostRepostResponse> responses = [];
+
+            using IBurcatQueryProvider provider = InterfaceOptions.Provider();
+            foreach (var result in from r in provider.Get<PostRepost>() join f in provider.Get<Faction>() on (Guid)r.Faction equals f.Identifier join i in provider.Get<Image>() on (Guid)f.Icon equals i.Identifier into iss from i in iss.DefaultIfEmpty() where (Guid)r.Post == post.Identifier select new { Faction = f, Icon = i })
+                responses.Add(new(result.Faction, result.Icon));
+
+            return responses;
+        }
+
         public BurcatIdentifier<IPost> Post { get; }
         public BurcatIdentifier<Faction> Faction { get; }
         [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateDateEqualOrUnderNow))]

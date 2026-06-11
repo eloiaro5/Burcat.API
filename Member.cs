@@ -39,7 +39,7 @@ namespace Burcat.API
 
         public abstract void Register(string password);
         public abstract void VerifyEmail(string code);
-        public abstract void UpdatePassword(string newPassword);
+        public abstract void UpdatePassword(string oldPassword, string newPassword);
 
         public abstract Session? Login(string password);
         public abstract void LogoutAllSessions();
@@ -90,7 +90,7 @@ namespace Burcat.API
                 .OrderBy(faction => faction.Name)];
         });
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => true;
+        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => false;
         bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Identifier == member?.Value;
 
         public override object?[] GetBurcatConstructionValues() => [Email, Username];

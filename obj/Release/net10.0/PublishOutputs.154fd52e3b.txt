@@ -1,0 +1,8 @@
+C:\Users\eloic\source\repos\Burcat\publish\Burcat.API.dll
+C:\Users\eloic\source\repos\Burcat\publish\Burcat.API.deps.json
+C:\Users\eloic\source\repos\Burcat\publish\Burcat.API.pdb
+C:\Users\eloic\source\repos\Burcat\publish\FFMpegCore.dll
+C:\Users\eloic\source\repos\Burcat\publish\Instances.dll
+C:\Users\eloic\source\repos\Burcat\publish\SixLabors.ImageSharp.dll
+C:\Users\eloic\source\repos\Burcat\publish\BurcatProtocol.dll
+C:\Users\eloic\source\repos\Burcat\publish\BurcatProtocol.pdb

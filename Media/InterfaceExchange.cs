@@ -16,11 +16,22 @@ namespace Burcat.API
     {
         public Member Owner { get; }
         public IPost Post { get; }
+        public Politeness Politeness { get; }
         public BurcatList<PostReaction> Reactions { get; }
         public BurcatList<PostSearchResponse> Responses { get; }
 
-        public PostSearchResponse(Member owner, IPost post, BurcatList<PostReaction> reactions, BurcatList<PostSearchResponse> responses) : base(Guid.Empty) { Owner = owner; Post = post; Reactions = reactions; Responses = responses; }
+        public PostSearchResponse(Member owner, IPost post, Politeness politeness, BurcatList<PostReaction> reactions, BurcatList<PostSearchResponse> responses) : base(Guid.Empty) { Owner = owner; Post = post; Politeness = politeness; Reactions = reactions; Responses = responses; }
 
-        public override object?[] GetBurcatConstructionValues() => [Owner, Post, Reactions, Responses];
+        public override object?[] GetBurcatConstructionValues() => [Owner, Post, Politeness, Reactions, Responses];
+    }
+
+    public class PostRepostResponse : BurcatObject
+    {
+        public Faction Faction { get; }
+        public Image Icon { get; }
+
+        public PostRepostResponse(Faction faction, Image icon) { Faction = faction; Icon = icon; }
+
+        public override object?[] GetBurcatConstructionValues() => [Faction, Icon];
     }
 }

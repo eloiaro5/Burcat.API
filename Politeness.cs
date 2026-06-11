@@ -59,6 +59,11 @@ namespace Burcat.API
             Politeness politeness = new(owner, name ?? string.Empty, LanguagePoliteness.ZeroProfanity, RacismPoliteness.ZeroRacismReference, SexualityPoliteness.ZeroSexualConnotation, ViolencePoliteness.ZeroViolence);
             return politeness;
         }
+        public static Politeness GetNewAverage(BurcatIdentifier<Member> owner, string? name = null)
+        {
+            Politeness politeness = new(owner, name ?? string.Empty, LanguagePoliteness.OcassionalClearProfanity, RacismPoliteness.DirectSterotypingWithoutThreats, SexualityPoliteness.CasualSexualWordsOrSuggestiveImagery, ViolencePoliteness.ExplicitMildViolenceOrImpliedViolence);
+            return politeness;
+        }
         public static Politeness GetNewMaximum(BurcatIdentifier<Member> owner, string? name = null)
         {
             Politeness politeness = new(owner, name ?? string.Empty, LanguagePoliteness.RepeatedSlurSpeech, RacismPoliteness.ExtremeRacism, SexualityPoliteness.PornographicContent, ViolencePoliteness.ExtremeViolence);
@@ -103,6 +108,6 @@ namespace Burcat.API
         public static bool operator >(Politeness? a, Politeness? b) => a != b && a >= b;
         public static bool operator <(Politeness? a, Politeness? b) => a != b && a <= b;
         public static bool operator >=(Politeness? a, Politeness? b) => a == b || !(a < b);
-        public static bool operator <=(Politeness? a, Politeness? b) => a == b || (a is not null && b is null) || (a is not null && b is not null && a.Language <= b.Language && a.Racism <= b.Racism && a.Sexuality <= b.Sexuality && a.Violence <= b.Violence);
+        public static bool operator <=(Politeness? a, Politeness? b) => a == b || b is null || (a is not null && b is not null && (a.Language <= b.Language || a.Racism <= b.Racism || a.Sexuality <= b.Sexuality || a.Violence <= b.Violence));
     }
 }

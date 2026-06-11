@@ -14,9 +14,9 @@ namespace Burcat.API
 
         public abstract BurcatList<Faction> DoFactionSearch(Member? member, string? search);
 
-        public BurcatField[] GetBurcatFields() => [];
-        public bool SetBurcatField(BurcatField field) => false;
+        BurcatField[] IBurcatObject.GetBurcatFields() => [];
+        void IBurcatObject.SetBurcatFields(BurcatField[] fields) { }
 
-        public IBurcatObject?[] GetBurcatConstructionValues() => [];
+        IBurcatObject?[] IBurcatObject.GetBurcatConstructionValues() => [];
     }
 }
