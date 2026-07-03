@@ -23,7 +23,7 @@ namespace Burcat.API.System
     [BurcatUnique(nameof(ResponseTo))]
     public class Strike : BurcatObject, IInterfaceObject
     {
-        public BurcatIdentifier<DevelopStatus> SetBy { get; }
+        public BurcatIdentifier<DevOps> SetBy { get; }
         public BurcatIdentifier<Member> SetTo { get; }
         public StrikeSeverity Severity { get; }
         public string Reason { get; }
@@ -31,9 +31,9 @@ namespace Burcat.API.System
         public DateTime SetIn { get; }
         public BurcatIdentifier<IReport>? ResponseTo { get; }
 
-        public Strike(BurcatIdentifier<DevelopStatus> setBy, BurcatIdentifier<Member> setTo, StrikeSeverity severity, string reason, DateTime setIn, BurcatIdentifier<IReport>? responseTo = null) { SetBy = setBy; SetTo = setTo; Severity = severity; Reason = reason; SetIn = setIn; ResponseTo = responseTo; }
+        public Strike(BurcatIdentifier<DevOps> setBy, BurcatIdentifier<Member> setTo, StrikeSeverity severity, string reason, DateTime setIn, BurcatIdentifier<IReport>? responseTo = null) { SetBy = setBy; SetTo = setTo; Severity = severity; Reason = reason; SetIn = setIn; ResponseTo = responseTo; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Moderator) == DevelopStatusType.Moderator;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [SetBy, SetTo, Severity, Reason, SetIn];
     }
 }

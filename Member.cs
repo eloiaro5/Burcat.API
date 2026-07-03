@@ -90,25 +90,11 @@ namespace Burcat.API
                 .OrderBy(faction => faction.Name)];
         });
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => false;
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Identifier == member?.Value;
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => false;
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => Identifier == member?.Value;
 
         public override object?[] GetBurcatConstructionValues() => [Email, Username];
-    }
-
-    [BurcatIdentity("cd6b4144-c132-4945-a890-68307486a4d9")]
-    [BurcatUnique(nameof(From), nameof(To))]
-    public class MemberBan : BurcatObject, IInterfaceObject
-    {
-        public BurcatIdentifier<Member> From { get; }
-        public BurcatIdentifier<Member> To { get; }
-
-        public MemberBan(BurcatIdentifier<Member> from, BurcatIdentifier<Member> to) { From = from; To = to; }
-
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && From == member;
-
-        public override object?[] GetBurcatConstructionValues() => [From, To];
     }
 
     [BurcatIdentity("a744e0b1-fe53-4e46-9f6e-18b9b109a9a1")]
@@ -125,8 +111,9 @@ namespace Burcat.API
 
         public MemberIconography(BurcatIdentifier<Member> owner, BurcatIdentifier<Image> icon, [Length(1, 32)] string name) { Owner = owner; Icon = icon; Name = name; }
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Icon, Name];
     }

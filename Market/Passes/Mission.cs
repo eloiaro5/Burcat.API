@@ -40,7 +40,7 @@ namespace Burcat.API.Market.Passes
 
         //public ListSet<Image> GetIcons() => [.. InterfaceConfiguration.Provider.GetQueryable<MissionIcononography>(this).Where(i => i.Mission == this).Select(i => i.Icon)]);
         //public Image? GetIcon(Politeness tolerance) => GetIcons().OrderBy(i => i.Politeness).FirstOrDefault(i => i.Politeness <= tolerance);
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Pass, Name, Icon, Prize];
     }
 
@@ -55,7 +55,7 @@ namespace Burcat.API.Market.Passes
 
         public MissionCurrencyPrize(BurcatIdentifier<Mission> mission, BurcatIdentifier<Currency> currency, int prize) { Mission = mission; Currency = currency; Prize = prize; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Mission, Currency, Prize];
     }
 
@@ -69,7 +69,7 @@ namespace Burcat.API.Market.Passes
 
         public MissionDependency(BurcatIdentifier<Mission> mission, BurcatIdentifier<Mission> dependsOn) { Mission = mission; DependsOn = dependsOn; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Mission, DependsOn];
     }
 
@@ -86,7 +86,7 @@ namespace Burcat.API.Market.Passes
 
         public MissionIcononography(BurcatIdentifier<Mission> owner, BurcatIdentifier<Image> icon, string name) { Owner = owner; Icon = icon; Name = name; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Owner, Icon, Name];
     }
 
@@ -104,7 +104,7 @@ namespace Burcat.API.Market.Passes
 
         public MissionCompletion(BurcatIdentifier<BattlePassEntry> entry, BurcatIdentifier<Mission> mission, int step, DateTime completedIn) { Entry = entry; Mission = mission; Step = step; CompletedIn = completedIn; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Entry, Mission, Step, CompletedIn];
     }
 }

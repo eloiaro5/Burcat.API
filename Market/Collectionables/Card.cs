@@ -25,7 +25,7 @@ namespace Burcat.API.Market.Collectionables
 
         //public ListSet<Member> GetCollaborations() => [.. from c in InterfaceConfiguration.Provider.GetQueryable<CardCollaboration>(this) where c.Card == this select c.With]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name];
     }
 
@@ -44,7 +44,7 @@ namespace Burcat.API.Market.Collectionables
 
         //public ListSet<Item> GetItems() => [.. from i in InterfaceConfiguration.Provider.GetQueryable<Item>(this) where i.Association.Card == Card && i.Association.Level <= Level select i]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Card, Level, Icon];
     }
 
@@ -61,7 +61,7 @@ namespace Burcat.API.Market.Collectionables
 
         public CardLevelOwnership(BurcatIdentifier<Member> owner, BurcatIdentifier<CardLevel> cardLevel, int amount) { Owner = owner; Card = cardLevel; Amount = amount; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Card, Amount];
     }
 
@@ -76,7 +76,7 @@ namespace Burcat.API.Market.Collectionables
 
         public Probability(BurcatIdentifier<Envelope> envelope, BurcatIdentifier<CardLevel> cardLevel, decimal chance) { Envelope = envelope; CardLevel = cardLevel; Chance = chance; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Envelope, CardLevel, Chance];
     }
 
@@ -92,7 +92,7 @@ namespace Burcat.API.Market.Collectionables
 
         public CardCollaboration(BurcatIdentifier<Card> card, BurcatIdentifier<Member> with) { Card = card; With = with; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Card, With];
     }
 }

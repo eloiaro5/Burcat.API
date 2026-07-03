@@ -24,7 +24,7 @@ namespace Burcat.API.System
 
         public Country(string name) { Name = name; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.System) == DevelopStatusType.System;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.System) == DevOpsGrade.System;
         public override object?[] GetBurcatConstructionValues() => [Name];
     }
 }

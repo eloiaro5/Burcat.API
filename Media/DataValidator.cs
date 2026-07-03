@@ -11,15 +11,21 @@ namespace Burcat.API
 {
     public static partial class DataValidator
     {
-        public static ValidationResult? ValidateMessagePost(MessagePost post)
+        public static ValidationResult? ValidateMessageComment(MessageComment comment)
         {
-            if (post.ResponseTo is not null && post.ResponseTo.Value.Value == post.Identifier) return new("Cannot respond to the same message.");
-            else if (post.Image is not null && post.Video is not null) return new("Cannot create a message with an image and a video attached.");
-            else if (post.Image is BurcatIdentifier<Image> image && InterfaceOptions.Find(image).Politeness != post.Politeness) return new("Cannot create a post where the post and the image have distinct politenesses.");
-            else if (post.Video is BurcatIdentifier<Video> video && InterfaceOptions.Find(video).Politeness != post.Politeness) return new("Cannot create a post where the post and the image have distinct politenesses.");
+            if (comment.ResponseTo is not null && comment.ResponseTo.Value.Value == comment.Identifier) return new("Cannot respond to the same message.");
+            else if (comment.Image is not null && comment.Video is not null) return new("Cannot create a comment with an image and a video attached.");
+            else if (comment.Image is BurcatIdentifier<Image> image && InterfaceOptions.Find(image).Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the image have distinct politenesses.");
+            else if (comment.Video is BurcatIdentifier<Video> video && InterfaceOptions.Find(video).Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the video have distinct politenesses.");
             else return ValidationResult.Success;
         }
-        public static ValidationResult? ValidateImagePost(ImagePost post) => InterfaceOptions.UseProvider(provider => (from i in provider.Get<Image>() where i.Identifier == (Guid)post.Image select (Guid)i.Politeness).FirstOrDefault() == (Guid)post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success);
+        public static ValidationResult? ValidateRepostPost(RepostPost post)
+        {
+            IPost target = InterfaceOptions.Find(post.Post);
+            if (target.Politeness != post.Politeness) return new("The repost and the post reposted can't have distinct politenesses.");
+            else return ValidationResult.Success;
+        }
+        public static ValidationResult? ValidateImagePost(ImagePost post) => InterfaceOptions.Find(post.Image).Politeness != post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success;
         public static ValidationResult? ValidatePostTags(string? tags)
         {
             if (tags is null) return ValidationResult.Success;
@@ -32,9 +38,9 @@ namespace Burcat.API
         public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => InterfaceOptions.UseProvider(provider => post.MaximumPoliteness is not null &&
             (from p in provider.Get<Politeness>() where p == post.MaximumPoliteness select p).First()
             <
-            (from pt in provider.Get<IPost>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pt.Identifier == post.Identifier select p).First()
+            (from pt in provider.Get<IPost>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pt.Identifier == (Guid)post.Post select p).First()
             ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success);
-        
+
         public static ValidationResult? ValidatePostReactionReaction(string reaction)
         {
             if (string.IsNullOrWhiteSpace(reaction)) return new("Can only react to messages with a single emote.");

@@ -12,7 +12,7 @@ namespace Burcat.API.Development
     [BurcatIdentity("b454af1b-4433-4521-ae4a-8510d4e27435")]
     public class Permission : BurcatObject, IInterfaceObject
     {
-        public BurcatIdentifier<DevelopStatus> Creator { get; }
+        public BurcatIdentifier<DevOps> Creator { get; }
         public string Name { get; }
         public bool Customizable { get; set; }
         public bool CanPost { get; set; }
@@ -25,7 +25,7 @@ namespace Burcat.API.Development
         public bool CanManageAuctions { get; set; }
         public bool CanManageCards { get; set; }
 
-        public Permission(BurcatIdentifier<DevelopStatus> creator, string name, bool customizable) { Creator = creator; Name = name; Customizable = customizable; }
+        public Permission(BurcatIdentifier<DevOps> creator, string name, bool customizable) { Creator = creator; Name = name; Customizable = customizable; }
 
         public override bool Equals(object? obj)
         {
@@ -52,7 +52,7 @@ namespace Burcat.API.Development
             return hashCode.ToHashCode();
         }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == Creator && d.Member == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d == Creator && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Customizable];
 
         public static bool operator ==(Permission a, Permission b) => a.Customizable == b.Customizable && a.CanPost == b.CanPost && a.CanReadConfidentialData == b.CanReadConfidentialData && a.CanSpend == b.CanSpend && a.CanMangeIcons == b.CanMangeIcons && a.CanManageAlias == b.CanManageAlias && a.CanManageAvatars == b.CanManageAvatars && a.CanManageGroups == b.CanManageGroups && a.CanManageAuctions == b.CanManageAuctions && a.CanManageCards == b.CanManageCards;
@@ -70,7 +70,7 @@ namespace Burcat.API.Development
 
         public PermissionGrant(BurcatIdentifier<Member> owner, BurcatIdentifier<Application> application, BurcatIdentifier<Permission> granted) { Owner = owner; Application = application; Granted = granted; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Application, Granted];
     }
 }

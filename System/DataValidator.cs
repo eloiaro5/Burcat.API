@@ -12,10 +12,20 @@ namespace Burcat.API
 {
     public static partial class DataValidator
     {
-        public static ValidationResult? ValidatePolitenessReport(PolitenessReport report) => InterfaceOptions.UseProvider(provider =>
-            (from pt in provider.Get<IPost>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where (Guid)report.Post == pt.Identifier select p).First()
-            >=
-            (from p in provider.Get<Politeness>() where p == report.ExpectedPoliteness select p).First()
-            ? new("The expected politeness must be under the post politeness.") : ValidationResult.Success);
+        public static ValidationResult? ValidatePolitenessReport(PolitenessReport report)
+        {
+            IMessage message = InterfaceOptions.Find(report.Message);
+
+            if (message.Owner == report.Reporter) return new("You cannot report your own message.");
+            else if (InterfaceOptions.Find(message.Politeness) >= InterfaceOptions.Find(report.ExpectedPoliteness)) return new("The expected politeness must be under the post politeness.");
+            else return ValidationResult.Success;
+        }
+        public static ValidationResult? ValidateCopyrightReport(CopyrightReport report)
+        {
+            IMessage message = InterfaceOptions.Find(report.Message);
+
+            if (message.Owner == report.Reporter) return new("You cannot report your own message.");
+            else return ValidationResult.Success;
+        }
     }
 }

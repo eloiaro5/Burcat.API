@@ -42,8 +42,9 @@ namespace Burcat.API
             else throw new FileNotFoundException("The image does not exist");
         }
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Creator == member;
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => Creator == member;
 
         public override object?[] GetBurcatConstructionValues() => [Creator, Politeness];
     }

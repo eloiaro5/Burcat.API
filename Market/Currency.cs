@@ -15,16 +15,16 @@ namespace Burcat.API.Market
     [BurcatUnique(nameof(Creator), nameof(Name))]
     public class Currency : BurcatObject, IAsset
     {
-        public BurcatIdentifier<DevelopStatus> Creator { get; }
+        public BurcatIdentifier<DevOps> Creator { get; }
         [Length(4, 64)]
         public string Name { get; }
         public BurcatIdentifier<Image> Icon { get; set; }
         public string? Description { get; set; }
 
-        public Currency(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon) { Creator = creator; Name = name; Icon = icon; }
-        public Currency(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon, string description) : this(creator, name, icon) { Description = description; }
+        public Currency(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon) { Creator = creator; Name = name; Icon = icon; }
+        public Currency(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon, string description) : this(creator, name, icon) { Description = description; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from s in provider.Get<DevelopStatus>() where s == Creator && s.Member == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from s in provider.Get<DevOps>() where s == Creator && s.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Creator, Name, Icon];
     }
 
@@ -40,7 +40,7 @@ namespace Burcat.API.Market
 
         public CurrencyOwnership(BurcatIdentifier<Member> owner, BurcatIdentifier<Currency> currrency, int amount) { Owner = owner; Currency = currrency; Amount = amount; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Currency, Amount];
     }
 }

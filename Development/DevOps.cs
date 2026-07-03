@@ -11,7 +11,7 @@ namespace Burcat.API.Development
 {
     [BurcatIdentity("f42879bd-c3d3-4015-8a61-a8a256c92cae")]
     [Flags]
-    public enum DevelopStatusType : int
+    public enum DevOpsGrade : int
     {
         Client = 1,
         Provider = 2,
@@ -22,12 +22,12 @@ namespace Burcat.API.Development
 
     [BurcatIdentity("8e8e6a23-1262-433e-b946-331ec4f0410e")]
     [BurcatUnique(nameof(Member))]
-    public class DevelopStatus : BurcatObject, IInterfaceObject
+    public class DevOps : BurcatObject, IInterfaceObject
     {
-        public static DevelopStatusType? GetDevelopType(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d.Member == member select d.Type).FirstOrDefault());
+        public static DevOpsGrade GetGrade(BurcatIdentifier<Member>? member) => member is null ? 0 : InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d.Member == member select d.Type).FirstOrDefault());
 
         public BurcatIdentifier<Member> Member { get; }
-        public DevelopStatusType Type { get; set; }
+        public DevOpsGrade Type { get; set; }
         [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateNumberEqualOrOverZero))]
         public int Priority { get; set; }
         [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateNumberEqualOrOverZero))]
@@ -35,9 +35,9 @@ namespace Burcat.API.Development
         [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateNumberEqualOrOverZero))]
         public int AvaliableCurrencyCreations { get; set; }
 
-        public DevelopStatus(BurcatIdentifier<Member> member, DevelopStatusType type) { Member = member; Type = type; }
+        public DevOps(BurcatIdentifier<Member> member, DevOpsGrade type) { Member = member; Type = type; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.System) == DevelopStatusType.System;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.System) == DevOpsGrade.System;
         public override object?[] GetBurcatConstructionValues() => [Member, Type];
     }
 }

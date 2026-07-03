@@ -33,7 +33,7 @@ namespace Burcat.API.Market.Passes
 
         public ListSet<Mission> GetMissions() => InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. provider.Get<Mission>().Where(m => m.Pass == this)]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name, Icon, Price];
     }
 
@@ -50,7 +50,7 @@ namespace Burcat.API.Market.Passes
 
         public BattlePassCurrencyPrice(BurcatIdentifier<BattlePass> pass, BurcatIdentifier<Currency> currency, int amount) { Pass = pass; Currency = currency; Amount = amount; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Showrunner) == DevelopStatusType.Showrunner;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Pass, Currency, Amount];
     }
 
@@ -75,7 +75,7 @@ namespace Burcat.API.Market.Passes
             ]);
         }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Pass, ObtainedIn];
     }
 }

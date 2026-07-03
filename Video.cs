@@ -67,7 +67,10 @@ namespace Burcat.API
             else throw new FileNotFoundException("The video does not exist");
         }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => Creator == member;
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => Creator == member;
+
         public override object?[] GetBurcatConstructionValues() => [Creator, Politeness];
     }
 }

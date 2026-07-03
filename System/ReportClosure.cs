@@ -21,7 +21,7 @@ namespace Burcat.API.System
 
         public SortedListSet<CountryBan> GetBans() => InterfaceOptions.UseProvider(provider => (SortedListSet<CountryBan>)[.. from b in provider.Get<CountryBan>() where b.Closure == this select b]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Moderator) == DevelopStatusType.Moderator;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [Report, ClosedBy, Motive, ClosedIn];
     }
 
@@ -36,7 +36,7 @@ namespace Burcat.API.System
 
         public CountryBan(BurcatIdentifier<ReportClosure> closure, BurcatIdentifier<Country> bannedIn, DateTime? inEffectSince) { Closure = closure; BannedIn = bannedIn; InEffectSince = inEffectSince ?? DateTime.Now; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevelopStatus.GetDevelopType(memberID) is DevelopStatusType type && (type & DevelopStatusType.Moderator) == DevelopStatusType.Moderator;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [Closure, BannedIn, InEffectSince];
     }
 }

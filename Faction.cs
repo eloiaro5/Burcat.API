@@ -33,10 +33,8 @@ namespace Burcat.API
             {
                 IQueryable<Faction> factions =
                 from f in provider.Get<Faction>()
-                join p in provider.Get<Politeness>() on (Guid)f.Tolerance equals p.Identifier
                 join r in provider.Get<FactionRole>() on f.Identifier equals (Guid)r.Faction
                 join m in provider.Get<FactionMembership>() on new { Role = (Guid?)r.Identifier, Member = member.Identifier } equals new { Role = (Guid?)m.Role, Member = (Guid)m.Member }
-                where p.Language <= tolerance.Language && p.Racism <= tolerance.Racism && p.Sexuality <= tolerance.Sexuality && p.Violence <= tolerance.Violence
                 select f;
 
                 IEnumerable<string> searchValues = GetSearchValues(search);
@@ -51,10 +49,9 @@ namespace Burcat.API
         [Length(8, 64)]
         public string Name { get; }
         public BurcatIdentifier<Image>? Icon { get; set; }
-        public BurcatIdentifier<Politeness> Tolerance { get; set; }
         public string? Description { get; set; }
 
-        public Faction(BurcatIdentifier<Member> owner, string name, BurcatIdentifier<Image>? icon, BurcatIdentifier<Politeness> tolerance, string? description = null) { Owner = owner; Name = name; Icon = icon; Tolerance = tolerance; Description = description; }
+        public Faction(BurcatIdentifier<Member> owner, string name, BurcatIdentifier<Image>? icon, string? description = null) { Owner = owner; Name = name; Icon = icon; Description = description; }
 
         public SortedListSet<Member> GetMembers() => InterfaceOptions.UseProvider(provider => (SortedListSet<Member>)[..
             (from m in provider.Get<FactionMembership>()
@@ -66,10 +63,11 @@ namespace Burcat.API
             join a in provider.Get<Member>() on (Guid)b.Member equals a.Identifier
             where b.Faction == this select a]);
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == this && r.CanManageGroup == true select true).Any()));
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == this && r.CanManageGroup == true select true).Any()));
 
-        public override object?[] GetBurcatConstructionValues() => [Owner, Name, Icon, Tolerance, Description];
+        public override object?[] GetBurcatConstructionValues() => [Owner, Name, Icon, Description];
     }
 
     [BurcatIdentity("33e00867-4213-4102-94b6-916d8c940992")]
@@ -82,8 +80,9 @@ namespace Burcat.API
 
         public FactionMembership(BurcatIdentifier<Faction> faction, BurcatIdentifier<Member> member, BurcatIdentifier<FactionRole>? role = null) { Faction = faction; Member = member; Role = role; }
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && Member == member && !InterfaceOptions.UseProvider(provider => (from b in provider.Get<FactionBan>() where b.Faction == Faction && b.Member == Member select true).Any());
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (Member == member || InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction && r.CanManageUsers == true select true).Any()));
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && Member == member && !InterfaceOptions.UseProvider(provider => (from b in provider.Get<FactionBan>() where b.Faction == Faction && b.Member == Member select true).Any());
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (Member == member || InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction && r.CanManageUsers == true select true).Any()));
 
         public override object?[] GetBurcatConstructionValues() => [Faction, Member, Role];
     }
@@ -97,8 +96,9 @@ namespace Burcat.API
 
         public FactionBan(BurcatIdentifier<Faction> faction, BurcatIdentifier<Member> member) { Faction = faction; Member = member; }
 
-        bool IInterfaceObject.ShouldCreate(BurcatIdentifier<Member>? member) => ((IInterfaceObject)this).ShouldManage(member);
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction && r.CanManageBans == true select true).Any()));
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (InterfaceOptions.Find(Faction).Owner == member || InterfaceOptions.UseProvider(provider => (from m in provider.Get<FactionMembership>() join r in provider.Get<FactionRole>() on (Guid?)m.Role equals r.Identifier where m.Member == member && r.Faction == Faction && r.CanManageBans == true select true).Any()));
 
         public override object?[] GetBurcatConstructionValues() => [Faction, Member];
     }

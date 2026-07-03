@@ -16,19 +16,19 @@ namespace Burcat.API.Development
     [BurcatIdentity("f05a5af4-0b66-4450-b712-3c44442c88c1")]
     public class Application : BurcatObject, ICollaborative
     {
-        public BurcatIdentifier<DevelopStatus> Creator { get; }
+        public BurcatIdentifier<DevOps> Creator { get; }
         [Length(4, 64)]
         public string Name { get; set; }
         public BurcatIdentifier<Image> Icon { get; set; }
         public BurcatIdentifier<Permission> Requirements { get; set; }
         public string? Description { get; set; }
 
-        public Application(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon, BurcatIdentifier<Permission> requirements) { Creator = creator; Name = name; Icon = icon; Requirements = requirements; }
-        public Application(BurcatIdentifier<DevelopStatus> creator, string name, BurcatIdentifier<Image> icon, BurcatIdentifier<Permission> requirements, string description) : this(creator, name, icon, requirements) { Description = description; }
+        public Application(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon, BurcatIdentifier<Permission> requirements) { Creator = creator; Name = name; Icon = icon; Requirements = requirements; }
+        public Application(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon, BurcatIdentifier<Permission> requirements, string description) : this(creator, name, icon, requirements) { Description = description; }
 
         //public ListSet<Development> GetDevelopers() => [.. from c in InterfaceConfiguration.Provider.GetQueryable<ApplicationCollaboration>(this) where c.Application == this select c.With]);
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == Creator && d.Member == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d == Creator && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Creator, Name, Icon, Requirements];
     }
 
@@ -38,14 +38,14 @@ namespace Burcat.API.Development
     public class ApplicationCollaboration : BurcatObject, ICollaboration
     {
         public BurcatIdentifier<Application> Application { get; }
-        public BurcatIdentifier<DevelopStatus> With { get; }
+        public BurcatIdentifier<DevOps> With { get; }
 
-        BurcatIdentifier<Member> ICollaboration.With => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevelopStatus>() where d == With select d.Member).First());
+        BurcatIdentifier<Member> ICollaboration.With => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d == With select d.Member).First());
         BurcatIdentifier<ICollaborative> ICollaboration.About => Application.Downcast<ICollaborative>();
 
-        public ApplicationCollaboration(BurcatIdentifier<Application> application, BurcatIdentifier<DevelopStatus> with) { Application = application; With = with; }
+        public ApplicationCollaboration(BurcatIdentifier<Application> application, BurcatIdentifier<DevOps> with) { Application = application; With = with; }
 
-        bool IInterfaceObject.ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Application>() join d in provider.Get<DevelopStatus>() on (Guid)a.Creator equals d.Identifier where a == Application && d.Member == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Application>() join d in provider.Get<DevOps>() on (Guid)a.Creator equals d.Identifier where a == Application && d.Member == member select true).Any());
         public override object?[] GetBurcatConstructionValues() => [Application, With];
     }
 }
