@@ -17,34 +17,6 @@ namespace Burcat.API
     [BurcatUnique(nameof(Name))]
     public class Faction : BurcatObject, IInterfaceObject
     {
-        public static BurcatList<Faction> GetFactions(string? search) => InterfaceOptions.UseProvider(provider =>
-        {
-            IQueryable<Faction> factions = from f in provider.Get<Faction>() select f;
-            IEnumerable<string> searchValues = GetSearchValues(search);
-            if (searchValues.Any()) factions = factions.Where(f => searchValues.Any(v => f.Name.Contains(v) || (f.Description != null && f.Description.Contains(v))));
-            return (BurcatList<Faction>)[.. factions.Take(100)];
-        });
-
-        public static BurcatList<Faction> GetFactionsFor(Member member, string? search)
-        {
-            Politeness tolerance = member.Tolerance is BurcatIdentifier<Politeness> tID ? InterfaceOptions.Find(tID) : API.Politeness.GetNewMaximum(member);
-
-            return InterfaceOptions.UseProvider(provider =>
-            {
-                IQueryable<Faction> factions =
-                from f in provider.Get<Faction>()
-                join r in provider.Get<FactionRole>() on f.Identifier equals (Guid)r.Faction
-                join m in provider.Get<FactionMembership>() on new { Role = (Guid?)r.Identifier, Member = member.Identifier } equals new { Role = (Guid?)m.Role, Member = (Guid)m.Member }
-                select f;
-
-                IEnumerable<string> searchValues = GetSearchValues(search);
-                if (searchValues.Any()) factions = factions.Where(f => searchValues.Any(v => f.Name.Contains(v) || (f.Description != null && f.Description.Contains(v))));
-                return (BurcatList<Faction>)[.. factions.Take(100)];
-            });
-        }
-
-        private static IEnumerable<string> GetSearchValues(string? search) => search?.Trim().Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Distinct() ?? [];
-
         public BurcatIdentifier<Member> Owner { get; }
         [Length(8, 64)]
         public string Name { get; }
@@ -62,6 +34,36 @@ namespace Burcat.API
             from b in provider.Get<FactionBan>()
             join a in provider.Get<Member>() on (Guid)b.Member equals a.Identifier
             where b.Faction == this select a]);
+
+        public FactionMembership? GetMembership(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider =>
+            provider.Get<FactionMembership>().FirstOrDefault(m => m.Faction == this && m.Member == member));
+
+        public bool IsMember(BurcatIdentifier<Member> member) => Owner == member || GetMembership(member) is not null;
+
+        public BurcatException? Join(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider =>
+        {
+            if (IsMember(member)) return new("The member has already joined this faction.");
+            else if (provider.Get<FactionBan>().Any(b => b.Faction == this && b.Member == member)) return new ("The member is banned from this faction.");
+            else
+            {
+                FactionRole? initialRole = provider.Get<FactionRole>().FirstOrDefault(r => r.Faction == this && r.InitialRole);
+                BurcatIdentifier<FactionRole>? initialRoleIdentifier = initialRole is null ? null : new(initialRole.Identifier);
+                return BurcatChat.RelayCouple(new FactionMembership(this, member, initialRoleIdentifier));
+            }
+        });
+
+        public BurcatException? Leave(BurcatIdentifier<Member> member)
+        {
+            if (Owner == member) return new("The faction owner cannot leave the faction.");
+            else if (GetMembership(member) is not FactionMembership membership) return new("The member has not joined this faction.");
+            else return BurcatChat.RelayDecouple(membership);
+        }
+
+        public bool CanManageRoles(BurcatIdentifier<Member> member) => Owner == member || InterfaceOptions.UseProvider(provider =>
+            (from membership in provider.Get<FactionMembership>()
+             join role in provider.Get<FactionRole>() on (Guid?)membership.Role equals role.Identifier
+             where membership.Member == member && role.Faction == this && role.CanManageRoles
+             select true).Any());
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;

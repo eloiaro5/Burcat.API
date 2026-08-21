@@ -23,6 +23,18 @@ namespace Burcat.API
         public static ValidationResult? ValidateDecimalBetweenZeroAndOne(decimal value) => value < 0 || value > 1 ? new($"The decimal must be between 0 and 1.") : ValidationResult.Success;
         public static ValidationResult? ValidateNullDecimalBetweenZeroAndOne(decimal? value) => value is not null && (value < 0 || value > 1) ? new($"The decimal must be null or between 0 and 1.") : ValidationResult.Success;
 
+        public static ValidationResult? ValidateFactionRole(FactionRole role)
+        {
+            if (!role.InitialRole)
+            {
+                int expected = InterfaceOptions.TryFind<FactionRole>(role) is null ? 0 : 1;
+                return InterfaceOptions.UseProvider(provider => provider.Get<FactionRole>()
+                .Count(existingRole => existingRole.Faction == role.Faction && existingRole.InitialRole) > expected
+                ? new("Only one role per faction can be the initial role.") : ValidationResult.Success);
+            }
+            else return ValidationResult.Success;
+        }
+
         public static ValidationResult? ValidatePseudonym(Pseudonym pseudonym)
         {
             Politeness politeness = InterfaceOptions.Find(pseudonym.Politeness);

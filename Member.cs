@@ -44,6 +44,35 @@ namespace Burcat.API
         public abstract Session? Login(string password);
         public abstract void LogoutAllSessions();
 
+        /// <summary>Gets the follow relationship from this member to <paramref name="target" />, if one exists.</summary>
+        public MemberFollow? GetFollow(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
+            provider.Get<MemberFollow>().FirstOrDefault(follow => follow.From == this && follow.To == target));
+
+        /// <summary>Gets the ban relationship from this member to <paramref name="target" />, if one exists.</summary>
+        public MemberBan? GetBan(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
+            provider.Get<MemberBan>().FirstOrDefault(ban => ban.From == this && ban.To == target));
+
+        /// <summary>Determines whether this member follows <paramref name="target" />.</summary>
+        public bool IsFollowing(BurcatIdentifier<Member> target) => GetFollow(target) is not null;
+
+        /// <summary>Determines whether this member has banned <paramref name="target" />.</summary>
+        public bool HasBanned(BurcatIdentifier<Member> target) => GetBan(target) is not null;
+
+        /// <summary>Follows <paramref name="target" />.</summary>
+        public BurcatException? Follow(BurcatIdentifier<Member> target)
+        {
+            if (Identifier == target.Value) return new("A member cannot follow itself.");
+            else if (IsFollowing(target)) return new("The member is already followed.");
+            else return BurcatChat.RelayCouple(new MemberFollow(this, target));
+        }
+
+        /// <summary>Stops following <paramref name="target" />.</summary>
+        public BurcatException? Unfollow(BurcatIdentifier<Member> target)
+        {
+            if (GetFollow(target) is not MemberFollow follow) return new("The member is not followed.");
+            else return BurcatChat.RelayDecouple(follow);
+        }
+
         public Pseudonym? GetPseudonym(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (
             from ps in provider.Get<Pseudonym>()
             join p in provider.Get<Politeness>() on (Guid)ps.Politeness equals p.Identifier
@@ -69,7 +98,7 @@ namespace Burcat.API
             ).AsEnumerable().Where(p => p.Politeness <= tolerance).Select(p => p.Post).Take(100)]));
         }
 
-        public BurcatList<Faction> GetPostingFactions() => InterfaceOptions.UseProvider(provider =>
+        public ListSet<Faction> GetPostingFactions() => InterfaceOptions.UseProvider(provider =>
         {
             IEnumerable<Faction> ownedFactions =
                 from faction in provider.Get<Faction>()
@@ -83,7 +112,7 @@ namespace Burcat.API
                 where membership.Member == this && role.CanPost
                 select faction;
 
-            return (BurcatList<Faction>)[.. ownedFactions
+            return (ListSet<Faction>)[.. ownedFactions
                 .Concat(postableFactions)
                 .GroupBy(faction => faction.Identifier)
                 .Select(group => group.First())

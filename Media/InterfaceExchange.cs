@@ -8,10 +8,31 @@ namespace Burcat.API
 {
     public abstract partial class InterfaceExchange
     {
-        public abstract BurcatList<PostSearchResponse> DoPostSearch(Member? member, string? search);
-        public abstract BurcatList<PostSearchResponse> DoCommentSearch(Member? member, string? search);
+        public abstract BurcatList<PostSearchResponse> DoCommentSearch(Member? member, Member? target, string? search, Pagination pagination);
+        public abstract BurcatList<PostSearchResponse> DoCommentFeed(Member member, Pagination pagination);
+        public abstract BurcatList<PostSearchResponse> DoPostSearch(Member? member, Faction? target, string? search, Pagination pagination);
+        public abstract BurcatList<PostSearchResponse> DoPostFeed(Member member, Pagination pagination);
+
         public abstract PostSearchResponse? GetPost(Guid identifier);
         public abstract UserProfileResponse? GetUserProfile(Member? viewer, Guid identifier);
+    }
+
+    [BurcatIdentity("05af82d3-ad91-40ff-8808-43b94874e5a7")]
+    public readonly struct Pagination : IBurcatObject
+    {
+        public Guid Identifier { get => Guid.Empty; set => throw new InvalidOperationException(); }
+        public Guid Revision { get => Guid.Empty; set => throw new InvalidOperationException(); }
+
+        public int Offset { get; }
+        public int Limit { get; }
+
+        public Pagination() { Offset = 0; Limit = 25; }
+        public Pagination(int offset, int limit) { Offset = offset; Limit = limit; }
+
+        public BurcatField[] GetBurcatFields() => [];
+        public void SetBurcatFields(BurcatField[] fields) { }
+
+        public IBurcatObject?[] GetBurcatConstructionValues() => BurcatTranslator.ObjectsTranslate([Offset, Limit]);
     }
 
     [BurcatIdentity("69cb4a43-12fa-437d-8eac-21887aec6e2b")]
@@ -42,18 +63,26 @@ namespace Burcat.API
     public class UserProfileResponse : BurcatObject
     {
         public Member Member { get; }
+        public Pseudonym? Pseudonym { get; }
+        public Image? Icon { get; }
+        public MemberFollow? Follow { get; }
+        public MemberBan? Ban { get; }
         public BurcatList<Faction> Factions { get; }
         public BurcatList<PostSearchResponse> Comments { get; }
         public BurcatList<PostSearchResponse> Posts { get; }
 
-        public UserProfileResponse(Member member, BurcatList<Faction> factions, BurcatList<PostSearchResponse> comments, BurcatList<PostSearchResponse> posts) : base(Guid.Empty)
+        public UserProfileResponse(Member member, Pseudonym? pseudonym, Image? icon, MemberFollow? follow, MemberBan? ban, BurcatList<Faction> factions, BurcatList<PostSearchResponse> comments, BurcatList<PostSearchResponse> posts) : base(Guid.Empty)
         {
             Member = member;
+            Pseudonym = pseudonym;
+            Icon = icon;
+            Follow = follow;
+            Ban = ban;
             Factions = factions;
             Comments = comments;
             Posts = posts;
         }
 
-        public override object?[] GetBurcatConstructionValues() => [Member, Factions, Comments, Posts];
+        public override object?[] GetBurcatConstructionValues() => [Member, Pseudonym, Icon, Follow, Ban, Factions, Comments, Posts];
     }
 }

@@ -116,6 +116,17 @@ namespace Burcat.API
 
         public Politeness(BurcatIdentifier<Member> owner, string name, LanguagePoliteness language, RacismPoliteness racism, SexualityPoliteness sexuality, ViolencePoliteness violence, SubstanceUsePoliteness substanceUse, GamblingPoliteness gambling, DisturbingThemesPoliteness disturbingThemes) { Owner = owner; Name = string.IsNullOrWhiteSpace(name) ? Identifier.ToString().Replace("-", null) : name; Language = language; Racism = racism; Sexuality = sexuality; Violence = violence; SubstanceUse = substanceUse; Gambling = gambling; DisturbingThemes = disturbingThemes; }
 
+        /// <summary>Hides this politeness while preserving it for existing references.</summary>
+        public BurcatException? Hide()
+        {
+            if (IsHided) return new("The politeness is already hidden.");
+
+            Name = Identifier.ToString();
+            IsHided = true;
+            Revision = GuidExtensions.GenerateRandom();
+            return BurcatChat.RelayCouple(this);
+        }
+
         public int CompareTo(Politeness? other)
         {
             if (this == other) return 0;
@@ -132,7 +143,7 @@ namespace Burcat.API
         public override int GetHashCode() => HashCode.Combine(Language, Racism, Sexuality, Violence, SubstanceUse, Gambling, DisturbingThemes);
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) =>ShouldManage(member);
-        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => false;
         public bool ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Name, Language, Racism, Sexuality, Violence, SubstanceUse, Gambling, DisturbingThemes];

@@ -13,6 +13,7 @@ namespace Burcat.API
 {
     [BurcatIdentity("372d2430-436a-437d-a0f6-f34880edcf5a")]
     [BurcatUnique(nameof(Name))]
+    [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateFactionRole))]
     public class FactionRole : BurcatObject, IInterfaceObject
     {
         public BurcatIdentifier<Faction> Faction { get; }
@@ -26,6 +27,7 @@ namespace Burcat.API
         public bool CanManageRoles { get; set; }
         public bool CanManageGroup { get; set; }
         public bool CanManageBans { get; set; }
+        public bool InitialRole { get; set; }
 
         public FactionRole(BurcatIdentifier<Faction> faction, int level, string name) { Faction = faction; Level = level; Name = name; }
 
