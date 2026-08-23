@@ -48,7 +48,7 @@ namespace Burcat.API
             {
                 FactionRole? initialRole = provider.Get<FactionRole>().FirstOrDefault(r => r.Faction == this && r.InitialRole);
                 BurcatIdentifier<FactionRole>? initialRoleIdentifier = initialRole is null ? null : new(initialRole.Identifier);
-                return BurcatChat.RelayCouple(new FactionMembership(this, member, initialRoleIdentifier));
+                return (BurcatException?)null;//return BurcatChat.RelayCouple(new FactionMembership(this, member, initialRoleIdentifier));
             }
         });
 
@@ -56,7 +56,7 @@ namespace Burcat.API
         {
             if (Owner == member) return new("The faction owner cannot leave the faction.");
             else if (GetMembership(member) is not FactionMembership membership) return new("The member has not joined this faction.");
-            else return BurcatChat.RelayDecouple(membership);
+            else return (BurcatException?)null;//return BurcatChat.RelayDecouple(membership);
         }
 
         public bool CanManageRoles(BurcatIdentifier<Member> member) => Owner == member || InterfaceOptions.UseProvider(provider =>

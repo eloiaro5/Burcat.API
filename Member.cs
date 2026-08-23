@@ -63,14 +63,14 @@ namespace Burcat.API
         {
             if (Identifier == target.Value) return new("A member cannot follow itself.");
             else if (IsFollowing(target)) return new("The member is already followed.");
-            else return BurcatChat.RelayCouple(new MemberFollow(this, target));
+            else return (BurcatException?)null;//return BurcatChat.RelayCouple(new MemberFollow(this, target));
         }
 
         /// <summary>Stops following <paramref name="target" />.</summary>
         public BurcatException? Unfollow(BurcatIdentifier<Member> target)
         {
             if (GetFollow(target) is not MemberFollow follow) return new("The member is not followed.");
-            else return BurcatChat.RelayDecouple(follow);
+            else return (BurcatException?)null;//return BurcatChat.RelayDecouple(follow);
         }
 
         public Pseudonym? GetPseudonym(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (

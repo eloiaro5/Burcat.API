@@ -124,7 +124,7 @@ namespace Burcat.API
             Name = Identifier.ToString();
             IsHided = true;
             Revision = GuidExtensions.GenerateRandom();
-            return BurcatChat.RelayCouple(this);
+            return (BurcatException?)null;//return BurcatChat.RelayCouple(this);
         }
 
         public int CompareTo(Politeness? other)
