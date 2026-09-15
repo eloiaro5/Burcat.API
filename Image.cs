@@ -1,5 +1,6 @@
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -29,6 +30,7 @@ namespace Burcat.API
 
         public Image(BurcatIdentifier<Member> creator, BurcatIdentifier<Politeness> politeness) { Creator = creator; Politeness = politeness; }
 
+        [AtomicAction(nameof(DeleteImage))]
         public virtual void SetImage([BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateImageData))] byte[] data) => File.WriteAllBytes($"{ImagesPath}{Identifier}.png", ResizeImage(data, 512, 512));
         public virtual void DeleteImage()
         {
@@ -36,6 +38,7 @@ namespace Burcat.API
                 File.Delete($"{ImagesPath}{Identifier}.png");
         }
 
+        [AtomicAction]
         public virtual byte[] GetImage()
         {
             if (File.Exists($"{ImagesPath}{Identifier}.png")) return [.. File.ReadAllBytes($"{ImagesPath}{Identifier}.png")];

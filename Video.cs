@@ -1,5 +1,6 @@
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using FFMpegCore;
 using FFMpegCore.Pipes;
 using SixLabors.ImageSharp;
@@ -27,18 +28,27 @@ namespace Burcat.API
 
         public Video(BurcatIdentifier<Member> creator, BurcatIdentifier<Politeness> politeness) { Creator = creator; Politeness = politeness; }
 
+        [AtomicAction(nameof(DeleteVideo))]
         public void SetVideo(byte[] data)
         {
             if (ValidateVideo(data)) File.WriteAllBytes($"{VideosPath}{Identifier}.mp4", data);
             else throw new ArgumentException("The data is not from a MP4 video", nameof(data));
         }
 
+        public virtual void DeleteVideo()
+        {
+            if (File.Exists($"{VideosPath}{Identifier}.png"))
+                File.Delete($"{VideosPath}{Identifier}.png");
+        }
+
+        [AtomicAction]
         public virtual int GetVideoLength()
         {
             if (File.Exists($"{VideosPath}{Identifier}.mp4")) return FFProbe.Analyse($"{VideosPath}{Identifier}.mp4").Duration.Seconds;
             else throw new FileNotFoundException("The video does not exist");
         }
 
+        [AtomicAction]
         public virtual byte[] GetVideo(int fromSecond, int toSecond)
         {
             if (!File.Exists($"{VideosPath}{Identifier}.mp4")) throw new FileNotFoundException("The video does not exist");
@@ -61,6 +71,7 @@ namespace Burcat.API
             }
         }
 
+        [AtomicAction]
         public virtual byte[] GetVideo()
         {
             if (File.Exists($"{VideosPath}{Identifier}.png")) return File.ReadAllBytes($"{VideosPath}{Identifier}.mp4");
