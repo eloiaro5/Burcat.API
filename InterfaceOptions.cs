@@ -12,6 +12,7 @@ namespace Burcat.API
     public interface IBurcatQueryProvider : IDisposable
     {
         IQueryable<T> Get<T>() where T : class, IInterfaceObject;
+        bool ShouldDispose();
     }
 
     [BurcatIdentity("d6c84fbc-10b8-49ec-9eb4-e639223b8613")]
@@ -34,19 +35,35 @@ namespace Burcat.API
             return [.. FindMany(primaryIdentifier, lambda)];
         }
 
-        public static Func<IBurcatQueryProvider> Provider { get; set; } = () => new EmptyBurcatProvider();
+        public static Func<AsyncLocal<IBurcatQueryProvider>> Provider { private get; set; } = () => new() { Value = new EmptyBurcatProvider() };
+
+        private static IBurcatQueryProvider GetProvider() => Provider().Value ?? throw new NullReferenceException("A current thread provider has not been yet setted.");
 
         public static T UseProvider<T>(Func<IBurcatQueryProvider, T> use)
         {
-            using IBurcatQueryProvider provider = Provider();
-            return use(provider);
+            IBurcatQueryProvider provider = GetProvider();
+            try { return use(provider); }
+            finally
+            {
+                if (provider.ShouldDispose()) provider.Dispose();
+            }
+        }
+        public static void UseProvider(Action<IBurcatQueryProvider> use)
+        {
+            IBurcatQueryProvider provider = GetProvider();
+            try { use(provider); }
+            finally
+            {
+                if (provider.ShouldDispose()) provider.Dispose();
+            }
         }
     }
 
-    public sealed class EmptyBurcatProvider : IBurcatQueryProvider
+    internal sealed class EmptyBurcatProvider : IBurcatQueryProvider
     {
-        public IQueryable<T> Get<T>() where T : class, IInterfaceObject => Enumerable.Empty<T>().AsQueryable();
+        IQueryable<T> IBurcatQueryProvider.Get<T>() where T : class => Enumerable.Empty<T>().AsQueryable();
 
-        public void Dispose() { }
+        bool IBurcatQueryProvider.ShouldDispose() => true;
+        void IDisposable.Dispose() { }
     }
 }
