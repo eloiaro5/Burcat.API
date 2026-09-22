@@ -15,8 +15,8 @@ namespace Burcat.API
         {
             if (comment.ResponseTo is not null && comment.ResponseTo.Value.Value == comment.Identifier) return new("Cannot respond to the same message.");
             else if (comment.Image is not null && comment.Video is not null) return new("Cannot create a comment with an image and a video attached.");
-            else if (comment.Image is BurcatIdentifier<Image> image && InterfaceOptions.Find(image).Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the image have distinct politenesses.");
-            else if (comment.Video is BurcatIdentifier<Video> video && InterfaceOptions.Find(video).Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the video have distinct politenesses.");
+            else if (comment.Image is BurcatIdentifier<Image> image && InterfaceOptions.TryFind(image)?.Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the image have distinct politenesses.");
+            else if (comment.Video is BurcatIdentifier<Video> video && InterfaceOptions.TryFind(video)?.Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the video have distinct politenesses.");
             else return ValidationResult.Success;
         }
         public static ValidationResult? ValidateRepostPost(RepostPost post)

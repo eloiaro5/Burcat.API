@@ -35,26 +35,26 @@ namespace Burcat.API
             return [.. FindMany(primaryIdentifier, lambda)];
         }
 
-        public static Func<AsyncLocal<IBurcatQueryProvider>> Provider { private get; set; } = () => new() { Value = new EmptyBurcatProvider() };
-
-        private static IBurcatQueryProvider GetProvider() => Provider().Value ?? throw new NullReferenceException("A current thread provider has not been yet setted.");
+        public static Func<IBurcatQueryProvider> Provider { private get; set; } = () => new EmptyBurcatProvider();
 
         public static T UseProvider<T>(Func<IBurcatQueryProvider, T> use)
         {
-            IBurcatQueryProvider provider = GetProvider();
+            IBurcatQueryProvider provider = Provider();
             try { return use(provider); }
             finally
             {
-                if (provider.ShouldDispose()) provider.Dispose();
+                if (provider.ShouldDispose())
+                    provider.Dispose();
             }
         }
         public static void UseProvider(Action<IBurcatQueryProvider> use)
         {
-            IBurcatQueryProvider provider = GetProvider();
+            IBurcatQueryProvider provider = Provider();
             try { use(provider); }
             finally
             {
-                if (provider.ShouldDispose()) provider.Dispose();
+                if (provider.ShouldDispose())
+                    provider.Dispose();
             }
         }
     }
