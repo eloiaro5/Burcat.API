@@ -3,6 +3,7 @@ using Burcat.API.Media;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -40,6 +41,7 @@ namespace Burcat.API
 
         public bool IsMember(BurcatIdentifier<Member> member) => Owner == member || GetMembership(member) is not null;
 
+        [SameParametersRollbackAction(nameof(Leave))]
         public BurcatException? Join(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider =>
         {
             if (IsMember(member)) return new("The member has already joined this faction.");
@@ -52,6 +54,7 @@ namespace Burcat.API
             }
         });
 
+        [SameParametersRollbackAction(nameof(Join))]
         public BurcatException? Leave(BurcatIdentifier<Member> member)
         {
             if (Owner == member) return new("The faction owner cannot leave the faction.");

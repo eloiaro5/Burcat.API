@@ -30,7 +30,7 @@ namespace Burcat.API
 
         public Image(BurcatIdentifier<Member> creator, BurcatIdentifier<Politeness> politeness) { Creator = creator; Politeness = politeness; }
 
-        [AtomicAction(nameof(DeleteImage))]
+        [ParameterlessRollbackAction(nameof(DeleteImage))]
         public virtual void SetImage([BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateImageData))] byte[] data) => File.WriteAllBytes($"{ImagesPath}{Identifier}.png", ResizeImage(data, 512, 512));
         public virtual void DeleteImage()
         {

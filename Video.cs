@@ -28,7 +28,7 @@ namespace Burcat.API
 
         public Video(BurcatIdentifier<Member> creator, BurcatIdentifier<Politeness> politeness) { Creator = creator; Politeness = politeness; }
 
-        [AtomicAction(nameof(DeleteVideo))]
+        [ParameterlessRollbackAction(nameof(DeleteVideo))]
         public void SetVideo(byte[] data)
         {
             if (ValidateVideo(data)) File.WriteAllBytes($"{VideosPath}{Identifier}.mp4", data);
@@ -37,8 +37,8 @@ namespace Burcat.API
 
         public virtual void DeleteVideo()
         {
-            if (File.Exists($"{VideosPath}{Identifier}.png"))
-                File.Delete($"{VideosPath}{Identifier}.png");
+            if (File.Exists($"{VideosPath}{Identifier}.mp4"))
+                File.Delete($"{VideosPath}{Identifier}.mp4");
         }
 
         [AtomicAction]
