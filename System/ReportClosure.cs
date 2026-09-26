@@ -2,6 +2,7 @@ using Burcat.API.Development;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System.ComponentModel.DataAnnotations;
 using System.Runtime.InteropServices;
 
@@ -19,6 +20,7 @@ namespace Burcat.API.System
 
         public ReportClosure(BurcatIdentifier<IReport> report, BurcatIdentifier<Member> closedBy, string motive, DateTime? closedIn) { Report = report; ClosedBy = closedBy; Motive = motive; ClosedIn = closedIn ?? DateTime.Now; }
 
+        [AtomicAction]
         public SortedListSet<CountryBan> GetBans() => InterfaceOptions.UseProvider(provider => (SortedListSet<CountryBan>)[.. from b in provider.Get<CountryBan>() where b.Closure == this select b]);
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;

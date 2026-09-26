@@ -26,42 +26,26 @@ namespace Burcat.API
 
         public Faction(BurcatIdentifier<Member> owner, string name, BurcatIdentifier<Image>? icon, string? description = null) { Owner = owner; Name = name; Icon = icon; Description = description; }
 
+        [AtomicAction]
         public SortedListSet<Member> GetMembers() => InterfaceOptions.UseProvider(provider => (SortedListSet<Member>)[..
             (from m in provider.Get<FactionMembership>()
             join a in provider.Get<Member>() on (Guid)m.Member equals a.Identifier
             where m.Faction == this select a).AsEnumerable().Concat([InterfaceOptions.Find(Owner)])]);
 
+        [AtomicAction]
         public SortedListSet<Member> GetBans() => InterfaceOptions.UseProvider(provider => (SortedListSet<Member>)[..
             from b in provider.Get<FactionBan>()
             join a in provider.Get<Member>() on (Guid)b.Member equals a.Identifier
             where b.Faction == this select a]);
 
+        [AtomicAction]
         public FactionMembership? GetMembership(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider =>
             provider.Get<FactionMembership>().FirstOrDefault(m => m.Faction == this && m.Member == member));
 
+        [AtomicAction]
         public bool IsMember(BurcatIdentifier<Member> member) => Owner == member || GetMembership(member) is not null;
 
-        [SameParametersRollbackAction(nameof(Leave))]
-        public BurcatException? Join(BurcatIdentifier<Member> member) => InterfaceOptions.UseProvider(provider =>
-        {
-            if (IsMember(member)) return new("The member has already joined this faction.");
-            else if (provider.Get<FactionBan>().Any(b => b.Faction == this && b.Member == member)) return new ("The member is banned from this faction.");
-            else
-            {
-                FactionRole? initialRole = provider.Get<FactionRole>().FirstOrDefault(r => r.Faction == this && r.InitialRole);
-                BurcatIdentifier<FactionRole>? initialRoleIdentifier = initialRole is null ? null : new(initialRole.Identifier);
-                return (BurcatException?)null;//return BurcatChat.RelayCouple(new FactionMembership(this, member, initialRoleIdentifier));
-            }
-        });
-
-        [SameParametersRollbackAction(nameof(Join))]
-        public BurcatException? Leave(BurcatIdentifier<Member> member)
-        {
-            if (Owner == member) return new("The faction owner cannot leave the faction.");
-            else if (GetMembership(member) is not FactionMembership membership) return new("The member has not joined this faction.");
-            else return (BurcatException?)null;//return BurcatChat.RelayDecouple(membership);
-        }
-
+        [AtomicAction]
         public bool CanManageRoles(BurcatIdentifier<Member> member) => Owner == member || InterfaceOptions.UseProvider(provider =>
             (from membership in provider.Get<FactionMembership>()
              join role in provider.Get<FactionRole>() on (Guid?)membership.Role equals role.Identifier

@@ -1,5 +1,6 @@
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -100,6 +101,7 @@ namespace Burcat.API
             return politeness;
         }
 
+        [AtomicAction]
         public static Politeness? GetByName(BurcatIdentifier<Member> owner, string name) => InterfaceOptions.UseProvider(provider => (from p in provider.Get<Politeness>() where p.Owner == owner && p.Name == name select p).FirstOrDefault());
 
         public BurcatIdentifier<Member> Owner { get; }
@@ -117,14 +119,23 @@ namespace Burcat.API
         public Politeness(BurcatIdentifier<Member> owner, string name, LanguagePoliteness language, RacismPoliteness racism, SexualityPoliteness sexuality, ViolencePoliteness violence, SubstanceUsePoliteness substanceUse, GamblingPoliteness gambling, DisturbingThemesPoliteness disturbingThemes) { Owner = owner; Name = string.IsNullOrWhiteSpace(name) ? Identifier.ToString().Replace("-", null) : name; Language = language; Racism = racism; Sexuality = sexuality; Violence = violence; SubstanceUse = substanceUse; Gambling = gambling; DisturbingThemes = disturbingThemes; }
 
         /// <summary>Hides this politeness while preserving it for existing references.</summary>
-        public BurcatException? Hide()
+        public void Hide()
         {
-            if (IsHided) return new("The politeness is already hidden.");
+            if (!IsHided)
+            {
+                Name = Identifier.ToString();
+                IsHided = true;
+                Revision = GuidExtensions.GenerateRandom();
+            }
+        }
 
-            Name = Identifier.ToString();
-            IsHided = true;
-            Revision = GuidExtensions.GenerateRandom();
-            return (BurcatException?)null;//return BurcatChat.RelayCouple(this);
+        public void Show()
+        {
+            if (IsHided)
+            {
+                IsHided = false;
+                Revision = GuidExtensions.GenerateRandom();
+            }
         }
 
         public int CompareTo(Politeness? other)

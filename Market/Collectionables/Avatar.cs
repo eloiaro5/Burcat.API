@@ -1,6 +1,7 @@
 using Burcat.API.Development;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using BurcatProtocol.Collections;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace Burcat.API.Market.Collectionables
 
         public Avatar(BurcatIdentifier<Member> owner, string name) { Owner = owner; Name = name; }
 
+        [AtomicAction]
         public ListSet<Collocation> GetCollocations() => InterfaceOptions.UseProvider(provider => (ListSet<Collocation>)[.. from c in provider.Get<Collocation>() where c.Owner == this select c]);
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;

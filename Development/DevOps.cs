@@ -2,6 +2,7 @@ using Burcat.API.Market.Collectionables;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -24,7 +25,9 @@ namespace Burcat.API.Development
     [BurcatUnique(nameof(Member))]
     public class DevOps : BurcatObject, IInterfaceObject
     {
+        [AtomicAction]
         public static DevOpsGrade GetGrade(BurcatIdentifier<Member>? member) => member is null ? 0 : InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d.Member == member select d.Type).FirstOrDefault());
+        [AtomicAction]
         public static bool HasGrade(BurcatIdentifier<Member>? member, DevOpsGrade grade) => (GetGrade(member) & grade) == grade;
 
         public BurcatIdentifier<Member> Member { get; }

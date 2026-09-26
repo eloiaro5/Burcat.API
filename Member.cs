@@ -4,6 +4,7 @@ using Burcat.API.Media;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.InteropServices;
@@ -16,6 +17,7 @@ namespace Burcat.API
     [BurcatUnique(nameof(Username))]
     public abstract class Member : BurcatObject, IInterfaceObject, IPublisher, IProfile
     {
+        [AtomicAction]
         public static Member? GetMember(string username) => InterfaceOptions.UseProvider(provider => (from a in provider.Get<Member>() where a.Email == username || a.Username == username select a).FirstOrDefault());
 
         [EmailAddress]
@@ -45,40 +47,31 @@ namespace Burcat.API
         public abstract void LogoutAllSessions();
 
         /// <summary>Gets the follow relationship from this member to <paramref name="target" />, if one exists.</summary>
+        [AtomicAction]
         public MemberFollow? GetFollow(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
             provider.Get<MemberFollow>().FirstOrDefault(follow => follow.From == this && follow.To == target));
 
         /// <summary>Gets the ban relationship from this member to <paramref name="target" />, if one exists.</summary>
+        [AtomicAction]
         public MemberBan? GetBan(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
             provider.Get<MemberBan>().FirstOrDefault(ban => ban.From == this && ban.To == target));
 
         /// <summary>Determines whether this member follows <paramref name="target" />.</summary>
+        [AtomicAction]
         public bool IsFollowing(BurcatIdentifier<Member> target) => GetFollow(target) is not null;
 
         /// <summary>Determines whether this member has banned <paramref name="target" />.</summary>
+        [AtomicAction]
         public bool HasBanned(BurcatIdentifier<Member> target) => GetBan(target) is not null;
 
-        /// <summary>Follows <paramref name="target" />.</summary>
-        public BurcatException? Follow(BurcatIdentifier<Member> target)
-        {
-            if (Identifier == target.Value) return new("A member cannot follow itself.");
-            else if (IsFollowing(target)) return new("The member is already followed.");
-            else return (BurcatException?)null;//return BurcatChat.RelayCouple(new MemberFollow(this, target));
-        }
-
-        /// <summary>Stops following <paramref name="target" />.</summary>
-        public BurcatException? Unfollow(BurcatIdentifier<Member> target)
-        {
-            if (GetFollow(target) is not MemberFollow follow) return new("The member is not followed.");
-            else return (BurcatException?)null;//return BurcatChat.RelayDecouple(follow);
-        }
-
+        [AtomicAction]
         public Pseudonym? GetPseudonym(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (
             from ps in provider.Get<Pseudonym>()
             join p in provider.Get<Politeness>() on (Guid)ps.Politeness equals p.Identifier
             where (Guid)ps.Owner == Identifier orderby p descending
             select new { Pseudonym = ps, Politeness = p}).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Pseudonym);
 
+        [AtomicAction]
         public Image? GetIcon(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (
             from fi in provider.Get<MemberIconography>()
             join i in provider.Get<Image>() on (Guid)fi.Icon equals i.Identifier
@@ -86,6 +79,7 @@ namespace Burcat.API
             where (Guid)fi.Owner == Identifier orderby p descending
             select new { Image = i, Politeness = p }).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Image);
 
+        [AtomicAction]
         public BurcatList<IPost> GetPosts()
         {
             Politeness tolerance = Tolerance is BurcatIdentifier<Politeness> tID ? InterfaceOptions.Find(tID) : Politeness.GetNewMaximum(this);
@@ -98,6 +92,7 @@ namespace Burcat.API
             ).AsEnumerable().Where(p => p.Politeness <= tolerance).Select(p => p.Post).Take(100)]));
         }
 
+        [AtomicAction]
         public ListSet<Faction> GetPostingFactions() => InterfaceOptions.UseProvider(provider =>
         {
             IEnumerable<Faction> ownedFactions =

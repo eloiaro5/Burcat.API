@@ -1,5 +1,6 @@
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using System.ComponentModel.DataAnnotations;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
@@ -12,6 +13,7 @@ namespace Burcat.API
     [BurcatUnique(nameof(Token))]
     public abstract class Session : BurcatObject, IInterfaceObject
     {
+        [AtomicAction]
         public static Session? GetSession(string token) => InterfaceOptions.UseProvider(provider => (from s in provider.Get<Session>() where s.Token == token select s).FirstOrDefault());
 
         public BurcatIdentifier<Member> Owner { get; }

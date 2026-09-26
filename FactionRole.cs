@@ -1,6 +1,7 @@
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -31,6 +32,7 @@ namespace Burcat.API
 
         public FactionRole(BurcatIdentifier<Faction> faction, int level, string name) { Faction = faction; Level = level; Name = name; }
 
+        [AtomicAction]
         public SortedListSet<Member> GetMembersWithRole() => InterfaceOptions.UseProvider(provider => (SortedListSet<Member>)[..
             from fm in provider.Get<FactionMembership>()
             join m in provider.Get<Member>() on (Guid)fm.Member equals m.Identifier

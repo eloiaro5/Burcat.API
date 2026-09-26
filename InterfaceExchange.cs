@@ -1,5 +1,6 @@
 ﻿using Burcat.API.Media;
 using BurcatProtocol;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -12,6 +13,7 @@ namespace Burcat.API
         public Guid Identifier { get; set => throw new InvalidOperationException(); } = Guid.Empty;
         public Guid Revision { get; set => throw new InvalidOperationException(); } = Guid.Empty;
 
+        [AtomicAction]
         public abstract BurcatList<Faction> DoFactionSearch(Member? member, string? search, Pagination pagination);
 
         BurcatField[] IBurcatObject.GetBurcatFields() => [];

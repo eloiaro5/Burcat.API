@@ -4,6 +4,7 @@ using Burcat.API.Media;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using BurcatProtocol.Collections;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -31,6 +32,7 @@ namespace Burcat.API.Market.Passes
         public BattlePass(string name, Image icon, decimal price, DateTime endTime) : this(name, icon, price) { EndTime = endTime; }
         public BattlePass(string name, Image icon, decimal price, string description, DateTime endTime) : this(name, icon, price, description) { EndTime = endTime; }
 
+        [AtomicAction]
         public ListSet<Mission> GetMissions() => InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. provider.Get<Mission>().Where(m => m.Pass == this)]);
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
@@ -64,6 +66,7 @@ namespace Burcat.API.Market.Passes
 
         public BattlePassEntry(BurcatIdentifier<Member> owner, BurcatIdentifier<BattlePass> pass, DateTime? obtainedIn) { Owner = owner; Pass = pass; ObtainedIn = obtainedIn ?? DateTime.Now; }
 
+        [AtomicAction]
         public ListSet<Mission> GetAvaliableMissions()
         {
             return InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. 

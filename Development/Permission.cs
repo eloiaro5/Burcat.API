@@ -1,6 +1,7 @@
 using Burcat.API.Market.Collectionables;
 using BurcatProtocol;
 using BurcatProtocol.Annotations;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
@@ -30,6 +31,7 @@ namespace Burcat.API.Development
     [BurcatUnique(nameof(Owner), nameof(Permission))]
     public class PermissionGrant : BurcatObject, IInterfaceObject
     {
+        [AtomicAction]
         public static bool HasSelectGrant(BurcatIdentifier<Member> ownerMember, BurcatIdentifier<Member> foreignMember, IInterfaceObject interfaceObject)
         {
             Guid classID = BurcatChat.GetClassIdentity(interfaceObject);
@@ -48,6 +50,7 @@ namespace Burcat.API.Development
             );
         }
 
+        [AtomicAction]
         public static bool HasManageGrant(BurcatIdentifier<Member> ownerMember, BurcatIdentifier<Member> foreignMember, IInterfaceObject interfaceObject)
         {
             Guid classID = BurcatChat.GetClassIdentity(interfaceObject);

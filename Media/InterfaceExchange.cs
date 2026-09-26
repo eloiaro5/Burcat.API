@@ -1,5 +1,6 @@
 ﻿using Burcat.API.Media;
 using BurcatProtocol;
+using BurcatProtocol.Transactions;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,12 +9,18 @@ namespace Burcat.API
 {
     public abstract partial class InterfaceExchange
     {
+        [AtomicAction]
         public abstract BurcatList<PostSearchResponse> DoCommentSearch(Member? member, Member? target, string? search, Pagination pagination);
+        [AtomicAction]
         public abstract BurcatList<PostSearchResponse> DoCommentFeed(Member member, Pagination pagination);
+        [AtomicAction]
         public abstract BurcatList<PostSearchResponse> DoPostSearch(Member? member, Faction? target, string? search, Pagination pagination);
+        [AtomicAction]
         public abstract BurcatList<PostSearchResponse> DoPostFeed(Member member, Pagination pagination);
 
+        [AtomicAction]
         public abstract PostSearchResponse? GetPost(Guid identifier);
+        [AtomicAction]
         public abstract UserProfileResponse? GetUserProfile(Member? viewer, Guid identifier);
     }
 
