@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Burcat.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3cefdc05aa385225d54d3294e0a0dc96cd6b05c1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2d7ca744b99a5ef2e83417b846c5b3cae0eb3fd3")]
 [assembly: System.Reflection.AssemblyProductAttribute("Burcat.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Burcat.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
