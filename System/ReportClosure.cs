@@ -21,7 +21,7 @@ namespace Burcat.API.System
         public ReportClosure(BurcatIdentifier<IReport> report, BurcatIdentifier<Member> closedBy, string motive, DateTime? closedIn) { Report = report; ClosedBy = closedBy; Motive = motive; ClosedIn = closedIn ?? DateTime.Now; }
 
         [AtomicAction]
-        public SortedListSet<CountryBan> GetBans() => InterfaceOptions.UseProvider(provider => (SortedListSet<CountryBan>)[.. from b in provider.Get<CountryBan>() where b.Closure == this select b]);
+        public SortedListSet<CountryBan> GetBans() => (SortedListSet<CountryBan>)[.. from b in InterfaceOptions.Provider.Get<CountryBan>() where b.Closure == this select b];
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [Report, ClosedBy, Motive, ClosedIn];

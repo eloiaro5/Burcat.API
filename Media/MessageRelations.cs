@@ -18,7 +18,7 @@ namespace Burcat.API.Media
 
         public AdvertisementPost(BurcatIdentifier<IPost> post, decimal payment, BurcatIdentifier<Politeness>? maximumPoliteness = null) { Post = post; Payment = payment; MaximumPoliteness = maximumPoliteness; }
 
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == Post.Value && p.Owner == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == Post.Value && (Guid)post.Owner == member.Value.Value).Any();
         public override object?[] GetBurcatConstructionValues() => [Post, Payment];
     }
 
@@ -49,7 +49,7 @@ namespace Burcat.API.Media
 
         public PostCollaboration(BurcatIdentifier<IPost> about, BurcatIdentifier<Member> with) { Post = about; With = with; }
 
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from p in provider.Get<IPost>() where p.Identifier == (Guid)Post.Value && p.Owner == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == Post.Value && (Guid)post.Owner == member.Value.Value).Any();
         public override object?[] GetBurcatConstructionValues() => [Post, With];
     }
 }

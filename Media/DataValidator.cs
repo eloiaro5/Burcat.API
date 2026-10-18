@@ -21,7 +21,7 @@ namespace Burcat.API
         }
         public static ValidationResult? ValidateRepostPost(RepostPost post)
         {
-            IPost target = InterfaceOptions.Find(post.Post);
+            IPost target = PostQueries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The reposted post does not exist.");
             if (target.Politeness != post.Politeness) return new("The repost and the post reposted can't have distinct politenesses.");
             else return ValidationResult.Success;
         }
@@ -35,11 +35,11 @@ namespace Burcat.API
             else return ValidationResult.Success;
         }
 
-        public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => InterfaceOptions.UseProvider(provider => post.MaximumPoliteness is not null &&
-            (from p in provider.Get<Politeness>() where p == post.MaximumPoliteness select p).First()
+        public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => post.MaximumPoliteness is not null &&
+            (from p in InterfaceOptions.Provider.Get<Politeness>() where p == post.MaximumPoliteness select p).First()
             <
-            (from pt in provider.Get<IPost>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pt.Identifier == (Guid)post.Post select p).First()
-            ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success);
+            InterfaceOptions.Find((PostQueries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The advertised post does not exist.")).Politeness)
+            ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success;
 
         public static ValidationResult? ValidatePostReactionReaction(string reaction)
         {

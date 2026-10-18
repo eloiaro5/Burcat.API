@@ -18,7 +18,7 @@ namespace Burcat.API
     public abstract class Member : BurcatObject, IInterfaceObject, IPublisher, IProfile
     {
         [AtomicAction]
-        public static Member? GetMember(string username) => InterfaceOptions.UseProvider(provider => (from a in provider.Get<Member>() where a.Email == username || a.Username == username select a).FirstOrDefault());
+        public static Member? GetMember(string username) => (from a in InterfaceOptions.Provider.Get<Member>() where a.Email == username || a.Username == username select a).FirstOrDefault();
 
         [EmailAddress]
         public string Email { get; }
@@ -48,13 +48,11 @@ namespace Burcat.API
 
         /// <summary>Gets the follow relationship from this member to <paramref name="target" />, if one exists.</summary>
         [AtomicAction]
-        public MemberFollow? GetFollow(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
-            provider.Get<MemberFollow>().FirstOrDefault(follow => follow.From == this && follow.To == target));
+        public MemberFollow? GetFollow(BurcatIdentifier<Member> target) => InterfaceOptions.Provider.Get<MemberFollow>().FirstOrDefault(follow => follow.From == this && follow.To == target);
 
         /// <summary>Gets the ban relationship from this member to <paramref name="target" />, if one exists.</summary>
         [AtomicAction]
-        public MemberBan? GetBan(BurcatIdentifier<Member> target) => InterfaceOptions.UseProvider(provider =>
-            provider.Get<MemberBan>().FirstOrDefault(ban => ban.From == this && ban.To == target));
+        public MemberBan? GetBan(BurcatIdentifier<Member> target) => InterfaceOptions.Provider.Get<MemberBan>().FirstOrDefault(ban => ban.From == this && ban.To == target);
 
         /// <summary>Determines whether this member follows <paramref name="target" />.</summary>
         [AtomicAction]
@@ -65,36 +63,38 @@ namespace Burcat.API
         public bool HasBanned(BurcatIdentifier<Member> target) => GetBan(target) is not null;
 
         [AtomicAction]
-        public Pseudonym? GetPseudonym(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (
-            from ps in provider.Get<Pseudonym>()
-            join p in provider.Get<Politeness>() on (Guid)ps.Politeness equals p.Identifier
+        public Pseudonym? GetPseudonym(Politeness tolerance) => (
+            from ps in InterfaceOptions.Provider.Get<Pseudonym>()
+            join p in InterfaceOptions.Provider.Get<Politeness>() on (Guid)ps.Politeness equals p.Identifier
             where (Guid)ps.Owner == Identifier orderby p descending
-            select new { Pseudonym = ps, Politeness = p}).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Pseudonym);
+            select new { Pseudonym = ps, Politeness = p}).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Pseudonym;
 
         [AtomicAction]
-        public Image? GetIcon(Politeness tolerance) => InterfaceOptions.UseProvider(provider => (
-            from fi in provider.Get<MemberIconography>()
-            join i in provider.Get<Image>() on (Guid)fi.Icon equals i.Identifier
-            join p in provider.Get<Politeness>() on (Guid)i.Politeness equals p.Identifier
+        public Image? GetIcon(Politeness tolerance) => (
+            from fi in InterfaceOptions.Provider.Get<MemberIconography>()
+            join i in InterfaceOptions.Provider.Get<Image>() on (Guid)fi.Icon equals i.Identifier
+            join p in InterfaceOptions.Provider.Get<Politeness>() on (Guid)i.Politeness equals p.Identifier
             where (Guid)fi.Owner == Identifier orderby p descending
-            select new { Image = i, Politeness = p }).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Image);
+            select new { Image = i, Politeness = p }).AsEnumerable().FirstOrDefault(pseudonym => pseudonym.Politeness <= tolerance)?.Image;
 
         [AtomicAction]
         public BurcatList<IPost> GetPosts()
         {
             Politeness tolerance = Tolerance is BurcatIdentifier<Politeness> tID ? InterfaceOptions.Find(tID) : Politeness.GetNewMaximum(this);
-            return InterfaceOptions.UseProvider(provider => new BurcatList<IPost>([.. 
-            (
-            from pt in provider.Get<IPost>()
-            join pl in provider.Get<Politeness>() on (Guid)pt.Politeness equals pl.Identifier
-            where (Guid)pt.Owner != Identifier
-            select new { Post = pt, Politeness = pl }
-            ).AsEnumerable().Where(p => p.Politeness <= tolerance).Select(p => p.Post).Take(100)]));
+            return [.. GetPosts<MessagePost>(tolerance).Concat<IPost>(GetPosts<RepostPost>(tolerance)).Concat(GetPosts<ImagePost>(tolerance)).Take(100)];
         }
 
+        private IEnumerable<TPost> GetPosts<TPost>(Politeness tolerance) where TPost : BurcatObject, IPost
+            => (from post in InterfaceOptions.Provider.Get<TPost>()
+                join politeness in InterfaceOptions.Provider.Get<Politeness>() on (Guid)post.Politeness equals politeness.Identifier
+                where (Guid)post.Owner != Identifier
+                select new { Post = post, Politeness = politeness })
+                .AsEnumerable().Where(value => value.Politeness <= tolerance).Select(value => value.Post);
+
         [AtomicAction]
-        public ListSet<Faction> GetPostingFactions() => InterfaceOptions.UseProvider(provider =>
+        public ListSet<Faction> GetPostingFactions()
         {
+            IBurcatQueryProvider provider = InterfaceOptions.Provider;
             IEnumerable<Faction> ownedFactions =
                 from faction in provider.Get<Faction>()
                 where faction.Owner == this
@@ -112,7 +112,7 @@ namespace Burcat.API
                 .GroupBy(faction => faction.Identifier)
                 .Select(group => group.First())
                 .OrderBy(faction => faction.Name)];
-        });
+        }
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => false;
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;

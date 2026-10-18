@@ -136,7 +136,7 @@ namespace Burcat.API.Media
     //    public string? Tags { get; set; }
     //    public DateTime PostDate { get; }
 
-    //    BurcatIdentifier<Politeness> IPost.Politeness => InterfaceOptions.UseProvider(provider => (from v in provider.Get<Video>() where v == Video select v.Politeness).First());
+    //    BurcatIdentifier<Politeness> IPost.Politeness => (from v in InterfaceOptions.Provider.Get<Video>() where v == Video select v.Politeness).First();
     //    string IPost.Message => Description;
 
     //    public VideoPost(BurcatIdentifier<Member> owner, BurcatIdentifier<Video> video, string description, string? tags = null, DateTime? postDate = null) { Owner = owner; Video = video; Description = description; Tags = tags; PostDate = postDate ?? DateTime.Now; }

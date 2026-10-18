@@ -41,14 +41,14 @@ namespace Burcat.API.Development
         public BurcatIdentifier<Application> Application { get; }
         public BurcatIdentifier<DevOps> With { get; }
 
-        BurcatIdentifier<Member> ICollaboration.With => InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d == With select d.Member).First());
+        BurcatIdentifier<Member> ICollaboration.With => (from d in InterfaceOptions.Provider.Get<DevOps>() where d == With select d.Member).First();
         BurcatIdentifier<ICollaborative> ICollaboration.About => Application.Downcast<ICollaborative>();
 
         public ApplicationCollaboration(BurcatIdentifier<Application> application, BurcatIdentifier<DevOps> with) { Application = application; With = with; }
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Application>() join d in provider.Get<DevOps>() on (Guid)a.Owner equals d.Identifier where a == Application && d.Member == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.Provider.Get<Application>() join d in InterfaceOptions.Provider.Get<DevOps>() on (Guid)a.Owner equals d.Identifier where a == Application && d.Member == member select true).Any();
 
         public override object?[] GetBurcatConstructionValues() => [Application, With];
     }

@@ -29,7 +29,13 @@ namespace Burcat.API.Media
         public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement) { Member = member; Advertisement = advertisement; }
         public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(member, advertisement) { IsInclusive = isInclusive; }
 
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<AdvertisementPost>() join p in provider.Get<IPost>() on (Guid)a.Post equals p.Identifier where a == Advertisement && p.Owner == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && CanManageAdvertisement(Advertisement, member.Value);
+
+        internal static bool CanManageAdvertisement(BurcatIdentifier<AdvertisementPost> advertisement, BurcatIdentifier<Member> member)
+        {
+            AdvertisementPost? value = InterfaceOptions.TryFind(advertisement);
+            return value is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == value.Post.Value && (Guid)post.Owner == member.Value).Any();
+        }
         public override object?[] GetBurcatConstructionValues() => [Member, Advertisement];
     }
 
@@ -47,7 +53,7 @@ namespace Burcat.API.Media
         public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(faction, advertisement) { IsInclusive = isInclusive; }
         public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive, bool isRecursive) : this(faction, advertisement, isInclusive) { IsRecursive = isRecursive; }
 
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<AdvertisementPost>() join p in provider.Get<IPost>() on (Guid)a.Post equals p.Identifier where a == Advertisement && p.Owner == member select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && MemberMatchmaking.CanManageAdvertisement(Advertisement, member.Value);
         public override object?[] GetBurcatConstructionValues() => [Faction, Advertisement];
     }
 }

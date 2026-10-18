@@ -33,9 +33,9 @@ namespace Burcat.API.Market.Collectionables
         public Envelope(string name, BurcatIdentifier<Image> icon, decimal price, string description, DateTime endTime) : this(name, icon, price, description) { EndTime = endTime; }
 
         [AtomicAction]
-        public ListSet<EnvelopeCurrencyPrice> GetPrices() => InterfaceOptions.UseProvider(provider => (ListSet<EnvelopeCurrencyPrice>)[.. from p in provider.Get<EnvelopeCurrencyPrice>() where p.Envelope == this select p]);
+        public ListSet<EnvelopeCurrencyPrice> GetPrices() => (ListSet<EnvelopeCurrencyPrice>)[.. from p in InterfaceOptions.Provider.Get<EnvelopeCurrencyPrice>() where p.Envelope == this select p];
         [AtomicAction]
-        public ListSet<Probability> GetProbabilities() => InterfaceOptions.UseProvider(provider => (ListSet<Probability>)[.. from p in provider.Get<Probability>() where p.Envelope == this select p]);
+        public ListSet<Probability> GetProbabilities() => (ListSet<Probability>)[.. from p in InterfaceOptions.Provider.Get<Probability>() where p.Envelope == this select p];
 
         [AtomicAction]
         public BurcatList<CardLevel> RollCards()

@@ -102,7 +102,7 @@ namespace Burcat.API
         }
 
         [AtomicAction]
-        public static Politeness? GetByName(BurcatIdentifier<Member> owner, string name) => InterfaceOptions.UseProvider(provider => (from p in provider.Get<Politeness>() where p.Owner == owner && p.Name == name select p).FirstOrDefault());
+        public static Politeness? GetByName(BurcatIdentifier<Member> owner, string name) => (from p in InterfaceOptions.Provider.Get<Politeness>() where p.Owner == owner && p.Name == name select p).FirstOrDefault();
 
         public BurcatIdentifier<Member> Owner { get; }
         [Length(1, 64)]

@@ -33,7 +33,7 @@ namespace Burcat.API.Market.Passes
         public BattlePass(string name, Image icon, decimal price, string description, DateTime endTime) : this(name, icon, price, description) { EndTime = endTime; }
 
         [AtomicAction]
-        public ListSet<Mission> GetMissions() => InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. provider.Get<Mission>().Where(m => m.Pass == this)]);
+        public ListSet<Mission> GetMissions() => (ListSet<Mission>)[.. InterfaceOptions.Provider.Get<Mission>().Where(m => m.Pass == this)];
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name, Icon, Price];
@@ -69,13 +69,13 @@ namespace Burcat.API.Market.Passes
         [AtomicAction]
         public ListSet<Mission> GetAvaliableMissions()
         {
-            return InterfaceOptions.UseProvider(provider => (ListSet<Mission>)[.. 
-                from mission in provider.Get<Mission>().Where(m => m.Pass == Pass)
-                let dependencies = provider.Get<MissionDependency>().Where(d => d.Mission == mission).Select(d => d.DependsOn)
-                let completions = provider.Get<MissionCompletion>().Where(c => c.Entry == this).Select(c => c.Mission)
+            return (ListSet<Mission>)[..
+                from mission in InterfaceOptions.Provider.Get<Mission>().Where(m => m.Pass == Pass)
+                let dependencies = InterfaceOptions.Provider.Get<MissionDependency>().Where(d => d.Mission == mission).Select(d => d.DependsOn)
+                let completions = InterfaceOptions.Provider.Get<MissionCompletion>().Where(c => c.Entry == this).Select(c => c.Mission)
                 where dependencies.All(d => completions.Contains(d))
                 select mission
-            ]);
+            ];
         }
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;

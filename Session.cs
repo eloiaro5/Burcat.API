@@ -14,7 +14,7 @@ namespace Burcat.API
     public abstract class Session : BurcatObject, IInterfaceObject
     {
         [AtomicAction]
-        public static Session? GetSession(string token) => InterfaceOptions.UseProvider(provider => (from s in provider.Get<Session>() where s.Token == token select s).FirstOrDefault());
+        public static Session? GetSession(string token) => (from s in InterfaceOptions.Provider.Get<Session>() where s.Token == token select s).FirstOrDefault();
 
         public BurcatIdentifier<Member> Owner { get; }
         [Length(24, 24)]

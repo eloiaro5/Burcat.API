@@ -14,7 +14,7 @@ namespace Burcat.API
     {
         public static ValidationResult? ValidatePolitenessReport(PolitenessReport report)
         {
-            IMessage message = InterfaceOptions.Find(report.Message);
+            IMessage message = InterfaceOptions.FindMessage(report.Message);
 
             if (message.Owner == report.Reporter) return new("You cannot report your own message.");
             else if (InterfaceOptions.Find(message.Politeness) >= InterfaceOptions.Find(report.ExpectedPoliteness)) return new("The expected politeness must be under the post politeness.");
@@ -22,7 +22,7 @@ namespace Burcat.API
         }
         public static ValidationResult? ValidateCopyrightReport(CopyrightReport report)
         {
-            IMessage message = InterfaceOptions.Find(report.Message);
+            IMessage message = InterfaceOptions.FindMessage(report.Message);
 
             if (message.Owner == report.Reporter) return new("You cannot report your own message.");
             else return ValidationResult.Success;

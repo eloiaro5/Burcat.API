@@ -23,7 +23,7 @@ namespace Burcat.API.Market.Collectionables
         public Avatar(BurcatIdentifier<Member> owner, string name) { Owner = owner; Name = name; }
 
         [AtomicAction]
-        public ListSet<Collocation> GetCollocations() => InterfaceOptions.UseProvider(provider => (ListSet<Collocation>)[.. from c in provider.Get<Collocation>() where c.Owner == this select c]);
+        public ListSet<Collocation> GetCollocations() => (ListSet<Collocation>)[.. from c in InterfaceOptions.Provider.Get<Collocation>() where c.Owner == this select c];
 
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Name];
@@ -65,7 +65,7 @@ namespace Burcat.API.Market.Collectionables
 
         public Collocation(BurcatIdentifier<Avatar> owner, BurcatIdentifier<Item> item, int axisX, int axisY, int axisZ, int width, int height) { Owner = owner; Item = item; AxisX = axisX; AxisY = axisY; AxisZ = axisZ; Width = width; Height = height; }
 
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Avatar>() where a == Owner select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.Provider.Get<Avatar>() where a == Owner select true).Any();
         public override object?[] GetBurcatConstructionValues() => [Owner, Item, AxisX, AxisY, AxisZ, Width, Height];
     }
 }

@@ -22,7 +22,7 @@ namespace Burcat.API.Development
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && InterfaceOptions.UseProvider(provider => (from a in provider.Get<Application>() join d in provider.Get<DevOps>() on memberID equals d.Member where a.Identifier == (Guid)Application select true).Any());
+        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && (from a in InterfaceOptions.Provider.Get<Application>() join d in InterfaceOptions.Provider.Get<DevOps>() on memberID equals d.Member where a.Identifier == (Guid)Application select true).Any();
 
         public override object?[] GetBurcatConstructionValues() => [Application, BurcatClass, SelectOnly];
     }
@@ -35,38 +35,36 @@ namespace Burcat.API.Development
         public static bool HasSelectGrant(BurcatIdentifier<Member> ownerMember, BurcatIdentifier<Member> foreignMember, IInterfaceObject interfaceObject)
         {
             Guid classID = BurcatChat.GetClassIdentity(interfaceObject);
-            return InterfaceOptions.UseProvider(provider => (
-                from g in provider.Get<PermissionGrant>()
-                join p in provider.Get<Permission>() on (Guid)g.Permission equals p.Identifier
-                join a in provider.Get<Application>() on (Guid)p.Application equals a.Identifier
-                join da in provider.Get<DevOps>() on (Guid)a.Owner equals da.Identifier
-                join c in provider.Get<ApplicationCollaboration>() on p.Identifier equals (Guid)c.Application
-                join dc in provider.Get<DevOps>() on (Guid)c.With equals dc.Identifier
+            return (
+                from g in InterfaceOptions.Provider.Get<PermissionGrant>()
+                join p in InterfaceOptions.Provider.Get<Permission>() on (Guid)g.Permission equals p.Identifier
+                join a in InterfaceOptions.Provider.Get<Application>() on (Guid)p.Application equals a.Identifier
+                join da in InterfaceOptions.Provider.Get<DevOps>() on (Guid)a.Owner equals da.Identifier
+                join c in InterfaceOptions.Provider.Get<ApplicationCollaboration>() on p.Identifier equals (Guid)c.Application
+                join dc in InterfaceOptions.Provider.Get<DevOps>() on (Guid)c.With equals dc.Identifier
                 where
                     g.Owner == ownerMember &&
                     p.BurcatClass == classID &&
                     (da.Identifier == (Guid)foreignMember || dc.Identifier == (Guid)foreignMember)
-                select true).Any()
-            );
+                select true).Any();
         }
 
         [AtomicAction]
         public static bool HasManageGrant(BurcatIdentifier<Member> ownerMember, BurcatIdentifier<Member> foreignMember, IInterfaceObject interfaceObject)
         {
             Guid classID = BurcatChat.GetClassIdentity(interfaceObject);
-            return InterfaceOptions.UseProvider(provider => (
-                from g in provider.Get<PermissionGrant>()
-                join p in provider.Get<Permission>() on (Guid)g.Permission equals p.Identifier
-                join a in provider.Get<Application>() on (Guid)p.Application equals a.Identifier
-                join da in provider.Get<DevOps>() on (Guid)a.Owner equals da.Identifier
-                join c in provider.Get<ApplicationCollaboration>() on p.Identifier equals (Guid)c.Application
-                join dc in provider.Get<DevOps>() on (Guid)c.With equals dc.Identifier
+            return (
+                from g in InterfaceOptions.Provider.Get<PermissionGrant>()
+                join p in InterfaceOptions.Provider.Get<Permission>() on (Guid)g.Permission equals p.Identifier
+                join a in InterfaceOptions.Provider.Get<Application>() on (Guid)p.Application equals a.Identifier
+                join da in InterfaceOptions.Provider.Get<DevOps>() on (Guid)a.Owner equals da.Identifier
+                join c in InterfaceOptions.Provider.Get<ApplicationCollaboration>() on p.Identifier equals (Guid)c.Application
+                join dc in InterfaceOptions.Provider.Get<DevOps>() on (Guid)c.With equals dc.Identifier
                 where
                     g.Owner == ownerMember &&
                     p.BurcatClass == classID && p.SelectOnly == false &&
                     (da.Member == foreignMember || dc.Member == foreignMember)
-                select true).Any()
-            );
+                select true).Any();
         }
 
         public BurcatIdentifier<Member> Owner { get; }

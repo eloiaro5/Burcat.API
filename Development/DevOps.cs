@@ -26,7 +26,7 @@ namespace Burcat.API.Development
     public class DevOps : BurcatObject, IInterfaceObject
     {
         [AtomicAction]
-        public static DevOpsGrade GetGrade(BurcatIdentifier<Member>? member) => member is null ? 0 : InterfaceOptions.UseProvider(provider => (from d in provider.Get<DevOps>() where d.Member == member select d.Type).FirstOrDefault());
+        public static DevOpsGrade GetGrade(BurcatIdentifier<Member>? member) => member is null ? 0 : (from d in InterfaceOptions.Provider.Get<DevOps>() where d.Member == member select d.Type).FirstOrDefault();
         [AtomicAction]
         public static bool HasGrade(BurcatIdentifier<Member>? member, DevOpsGrade grade) => (GetGrade(member) & grade) == grade;
 

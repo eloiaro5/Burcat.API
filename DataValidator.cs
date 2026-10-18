@@ -1,5 +1,6 @@
 ﻿﻿using Burcat.API.Media;
 using Burcat.API.System;
+using Burcat.API.Market.Passes;
 using BurcatProtocol;
 using System.ComponentModel.DataAnnotations;
 using System.Numerics;
@@ -28,29 +29,40 @@ namespace Burcat.API
             if (!role.InitialRole)
             {
                 int expected = InterfaceOptions.TryFind<FactionRole>(role) is null ? 0 : 1;
-                return InterfaceOptions.UseProvider(provider => provider.Get<FactionRole>()
+                return InterfaceOptions.Provider.Get<FactionRole>()
                 .Count(existingRole => existingRole.Faction == role.Faction && existingRole.InitialRole) > expected
-                ? new("Only one role per faction can be the initial role.") : ValidationResult.Success);
+                ? new("Only one role per faction can be the initial role.") : ValidationResult.Success;
             }
             else return ValidationResult.Success;
         }
 
         public static ValidationResult? ValidatePseudonym(Pseudonym pseudonym)
         {
+            IBurcatQueryProvider provider = InterfaceOptions.Provider;
             Politeness politeness = InterfaceOptions.Find(pseudonym.Politeness);
             int expected = InterfaceOptions.TryFind<Pseudonym>(pseudonym) is null ? 0 : 1;
-            return InterfaceOptions.UseProvider(provider => (from pt in provider.Get<Pseudonym>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pseudonym.Owner == p.Owner select p)
-            .AsEnumerable().Count(p => p == politeness) > expected
-            ? new("Only can exist one pseudonym with each politness combination.") : ValidationResult.Success);
+            return (from pt in provider.Get<Pseudonym>() join p in provider.Get<Politeness>() on (Guid)pt.Politeness equals p.Identifier where pseudonym.Owner == p.Owner select p).AsEnumerable().Count(p => p == politeness) > expected
+            ? new("Only can exist one pseudonym with each politness combination.") : ValidationResult.Success;
         }
 
         public static ValidationResult? ValidateIconography(IIconography icon)
         {
             Politeness politeness = InterfaceOptions.Find(InterfaceOptions.Find(icon.Icon).Politeness);
-            int expected = InterfaceOptions.TryFind<IIconography>(new(icon.Identifier)) is null ? 0 : 1;
-            return InterfaceOptions.UseProvider(provider => (from ic in provider.Get<IIconography>() join i in provider.Get<Image>() on (Guid)ic.Icon equals i.Identifier join p in provider.Get<Politeness>() on (Guid)i.Politeness equals p.Identifier where (Guid)icon.Owner == (Guid)p.Owner select p)
-            .AsEnumerable().Count(p => p == politeness) > expected
-            ? new("Only can exist one icon with each politness combination.") : ValidationResult.Success);
+            IBurcatQueryProvider provider = InterfaceOptions.Provider;
+            int expected = provider.Get<MemberIconography>().Any(value => value.Identifier == icon.Identifier)
+                || provider.Get<MissionIcononography>().Any(value => value.Identifier == icon.Identifier) ? 1 : 0;
+            IEnumerable<Politeness> values = (from value in provider.Get<MemberIconography>()
+                join image in provider.Get<Image>() on (Guid)value.Icon equals image.Identifier
+                join valuePoliteness in provider.Get<Politeness>() on (Guid)image.Politeness equals valuePoliteness.Identifier
+                where (Guid)icon.Owner == (Guid)valuePoliteness.Owner
+                select valuePoliteness).AsEnumerable()
+                .Concat(from value in provider.Get<MissionIcononography>()
+                    join image in provider.Get<Image>() on (Guid)value.Icon equals image.Identifier
+                    join valuePoliteness in provider.Get<Politeness>() on (Guid)image.Politeness equals valuePoliteness.Identifier
+                    where (Guid)icon.Owner == (Guid)valuePoliteness.Owner
+                    select valuePoliteness);
+            return values.Count(value => value == politeness) > expected
+            ? new("Only can exist one icon with each politness combination.") : ValidationResult.Success;
         }
         public static ValidationResult? ValidateImageData(byte[] data)
         {
