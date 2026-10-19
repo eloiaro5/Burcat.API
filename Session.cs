@@ -28,6 +28,8 @@ namespace Burcat.API
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => true;
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Token, EndTime];

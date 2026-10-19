@@ -33,6 +33,8 @@ namespace Burcat.API.System
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => ShouldManage(member) || (DevOps.GetGrade(member) & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Reporter == member;
 
         public override object?[] GetBurcatConstructionValues() => [Reporter, Message, Description, SetIn];
@@ -52,6 +54,8 @@ namespace Burcat.API.System
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => ShouldManage(member) || (DevOps.GetGrade(member) & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Reporter == member;
 
         public override object?[] GetBurcatConstructionValues() => [Reporter, Message, ExpectedPoliteness, SetIn];
@@ -73,6 +77,8 @@ namespace Burcat.API.System
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => ShouldManage(member) || (DevOps.GetGrade(member) & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Reporter == member;
 
         public override object?[] GetBurcatConstructionValues() => [Reporter, Message, InfringementDescription, URL, SetIn];

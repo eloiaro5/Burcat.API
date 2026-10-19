@@ -155,6 +155,8 @@ namespace Burcat.API
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) =>ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => false;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => Owner == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Name, Language, Racism, Sexuality, Violence, SubstanceUse, Gambling, DisturbingThemes];

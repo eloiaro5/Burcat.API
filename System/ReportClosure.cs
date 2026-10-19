@@ -23,6 +23,8 @@ namespace Burcat.API.System
         [AtomicAction]
         public SortedListSet<CountryBan> GetBans() => (SortedListSet<CountryBan>)[.. from b in InterfaceOptions.Provider.Get<CountryBan>() where b.Closure == this select b];
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [Report, ClosedBy, Motive, ClosedIn];
     }
@@ -38,6 +40,8 @@ namespace Burcat.API.System
 
         public CountryBan(BurcatIdentifier<ReportClosure> closure, BurcatIdentifier<Country> bannedIn, DateTime? inEffectSince) { Closure = closure; BannedIn = bannedIn; InEffectSince = inEffectSince ?? DateTime.Now; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [Closure, BannedIn, InEffectSince];
     }

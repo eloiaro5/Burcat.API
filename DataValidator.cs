@@ -36,6 +36,22 @@ namespace Burcat.API
             else return ValidationResult.Success;
         }
 
+        /// <summary>Validates membership identity and ensures an assigned role belongs to the membership's faction.</summary>
+        public static ValidationResult? ValidateFactionRoleAssignment(FactionMembership membership)
+        {
+            FactionMembership? current = InterfaceOptions.TryFind<FactionMembership>(membership);
+            if (current is not null && (current.Faction != membership.Faction || current.Member != membership.Member))
+                return new("An existing membership's faction and member cannot be changed.");
+
+            if (membership.Role is BurcatIdentifier<FactionRole> roleID)
+            {
+                FactionRole? role = InterfaceOptions.TryFind(roleID);
+                if (role is null || role.Faction != membership.Faction) return new("The assigned role must exist in the membership's faction.");
+            }
+
+            return ValidationResult.Success;
+        }
+
         public static ValidationResult? ValidatePseudonym(Pseudonym pseudonym)
         {
             IBurcatQueryProvider provider = InterfaceOptions.Provider;

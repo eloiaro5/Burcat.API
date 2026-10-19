@@ -28,6 +28,8 @@ namespace Burcat.API.Development
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => InterfaceOptions.Find(Owner).Member == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Name, Icon, Description];
@@ -48,6 +50,8 @@ namespace Burcat.API.Development
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.Provider.Get<Application>() join d in InterfaceOptions.Provider.Get<DevOps>() on (Guid)a.Owner equals d.Identifier where a == Application && d.Member == member select true).Any();
 
         public override object?[] GetBurcatConstructionValues() => [Application, With];

@@ -24,6 +24,8 @@ namespace Burcat.API.System
 
         public Country(string name) { Name = name; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.System) == DevOpsGrade.System;
         public override object?[] GetBurcatConstructionValues() => [Name];
     }

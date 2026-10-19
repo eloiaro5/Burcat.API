@@ -45,6 +45,8 @@ namespace Burcat.API.Market.Collectionables
             //return [.. from p in GetProbabilities() where p.Chance >= (decimal)rnd.NextDouble() select p.CardLevel]);
         }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name, Icon, Price];
     }
@@ -62,6 +64,8 @@ namespace Burcat.API.Market.Collectionables
 
         public EnvelopeCurrencyPrice(BurcatIdentifier<Envelope> envelope, BurcatIdentifier<Currency> currency, int amount) { Envelope = envelope; Currency = currency; Amount = amount; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Envelope, Currency, Amount];
     }

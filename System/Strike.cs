@@ -33,6 +33,8 @@ namespace Burcat.API.System
 
         public Strike(BurcatIdentifier<DevOps> setBy, BurcatIdentifier<Member> setTo, StrikeSeverity severity, string reason, DateTime setIn, BurcatIdentifier<IReport>? responseTo = null) { SetBy = setBy; SetTo = setTo; Severity = severity; Reason = reason; SetIn = setIn; ResponseTo = responseTo; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Moderator) == DevOpsGrade.Moderator;
         public override object?[] GetBurcatConstructionValues() => [SetBy, SetTo, Severity, Reason, SetIn];
     }

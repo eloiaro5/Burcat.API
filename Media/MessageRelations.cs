@@ -18,6 +18,8 @@ namespace Burcat.API.Media
 
         public AdvertisementPost(BurcatIdentifier<IPost> post, decimal payment, BurcatIdentifier<Politeness>? maximumPoliteness = null) { Post = post; Payment = payment; MaximumPoliteness = maximumPoliteness; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == Post.Value && (Guid)post.Owner == member.Value.Value).Any();
         public override object?[] GetBurcatConstructionValues() => [Post, Payment];
     }
@@ -35,9 +37,40 @@ namespace Burcat.API.Media
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Member == member;
 
         public override object?[] GetBurcatConstructionValues() => [Member, Message, Reaction];
+    }
+
+    [BurcatIdentity("e53065c7-8839-4844-b32e-aa747c5da38c")]
+    [BurcatUnique(nameof(Member), nameof(Message))]
+    public class PostDeletion : BurcatObject, IInterfaceObject
+    {
+        public BurcatIdentifier<Member> Requester { get; }
+        public BurcatIdentifier<IMessage> Message { get; }
+        public DateTime DeletionDate { get; }
+
+        public PostDeletion(BurcatIdentifier<Member> requester, BurcatIdentifier<IMessage> message) { Requester = requester; Message = message; DeletionDate = DateTime.Now; }
+
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        public bool ShouldManage(BurcatIdentifier<Member>? member)
+        {
+            if (member is null) return false;
+            if (Requester == member) return true;
+            if (InterfaceOptions.TryFindMessage(Message.Value) is not IPost post) return false;
+
+            return (from membership in InterfaceOptions.Provider.Get<FactionMembership>()
+                 join role in InterfaceOptions.Provider.Get<FactionRole>() on (Guid?)membership.Role equals role.Identifier
+                 where membership.Member == member && membership.Faction == post.Faction && role.Faction == post.Faction && role.CanManagePosts
+                 select true).Any();
+        }
+
+        public override object?[] GetBurcatConstructionValues() => [Requester, Message];
     }
 
     [BurcatIdentity("a4e8d20d-4832-42e2-a86c-f94a1c27c0e1")]
@@ -49,6 +82,8 @@ namespace Burcat.API.Media
 
         public PostCollaboration(BurcatIdentifier<IPost> about, BurcatIdentifier<Member> with) { Post = about; With = with; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == Post.Value && (Guid)post.Owner == member.Value.Value).Any();
         public override object?[] GetBurcatConstructionValues() => [Post, With];
     }

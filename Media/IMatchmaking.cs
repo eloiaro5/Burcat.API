@@ -29,6 +29,8 @@ namespace Burcat.API.Media
         public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement) { Member = member; Advertisement = advertisement; }
         public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(member, advertisement) { IsInclusive = isInclusive; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && CanManageAdvertisement(Advertisement, member.Value);
 
         internal static bool CanManageAdvertisement(BurcatIdentifier<AdvertisementPost> advertisement, BurcatIdentifier<Member> member)
@@ -53,6 +55,8 @@ namespace Burcat.API.Media
         public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(faction, advertisement) { IsInclusive = isInclusive; }
         public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive, bool isRecursive) : this(faction, advertisement, isInclusive) { IsRecursive = isRecursive; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && MemberMatchmaking.CanManageAdvertisement(Advertisement, member.Value);
         public override object?[] GetBurcatConstructionValues() => [Faction, Advertisement];
     }

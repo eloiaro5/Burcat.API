@@ -35,6 +35,8 @@ namespace Burcat.API.Market.Passes
         [AtomicAction]
         public ListSet<Mission> GetMissions() => (ListSet<Mission>)[.. InterfaceOptions.Provider.Get<Mission>().Where(m => m.Pass == this)];
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Name, Icon, Price];
     }
@@ -52,6 +54,8 @@ namespace Burcat.API.Market.Passes
 
         public BattlePassCurrencyPrice(BurcatIdentifier<BattlePass> pass, BurcatIdentifier<Currency> currency, int amount) { Pass = pass; Currency = currency; Amount = amount; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Pass, Currency, Amount];
     }
@@ -78,6 +82,8 @@ namespace Burcat.API.Market.Passes
             ];
         }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Pass, ObtainedIn];
     }

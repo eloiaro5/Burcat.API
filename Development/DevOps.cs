@@ -41,6 +41,8 @@ namespace Burcat.API.Development
 
         public DevOps(BurcatIdentifier<Member> member, DevOpsGrade type) { Member = member; Type = type; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.System) == DevOpsGrade.System;
         public override object?[] GetBurcatConstructionValues() => [Member, Type];
     }

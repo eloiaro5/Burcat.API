@@ -14,6 +14,8 @@ namespace Burcat.API
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && From == member;
 
         public override object?[] GetBurcatConstructionValues() => [From, To];

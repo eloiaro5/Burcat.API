@@ -25,6 +25,8 @@ namespace Burcat.API.Market.Collectionables
         [AtomicAction]
         public ListSet<Collocation> GetCollocations() => (ListSet<Collocation>)[.. from c in InterfaceOptions.Provider.Get<Collocation>() where c.Owner == this select c];
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Name];
     }
@@ -42,6 +44,8 @@ namespace Burcat.API.Market.Collectionables
         public Item(BurcatIdentifier<CardLevel> association, string name, BurcatIdentifier<Image> representation) { Association = association; Name = name; Representation = representation; }
         public Item(BurcatIdentifier<CardLevel> association, string name, BurcatIdentifier<Image> representation, string description) : this(association, name, representation) { Description = description; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is BurcatIdentifier<Member> memberID && DevOps.GetGrade(memberID) is DevOpsGrade type && (type & DevOpsGrade.Showrunner) == DevOpsGrade.Showrunner;
         public override object?[] GetBurcatConstructionValues() => [Association, Name, Representation];
     }
@@ -65,6 +69,8 @@ namespace Burcat.API.Market.Collectionables
 
         public Collocation(BurcatIdentifier<Avatar> owner, BurcatIdentifier<Item> item, int axisX, int axisY, int axisZ, int width, int height) { Owner = owner; Item = item; AxisX = axisX; AxisY = axisY; AxisZ = axisZ; Width = width; Height = height; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from a in InterfaceOptions.Provider.Get<Avatar>() where a == Owner select true).Any();
         public override object?[] GetBurcatConstructionValues() => [Owner, Item, AxisX, AxisY, AxisZ, Width, Height];
     }

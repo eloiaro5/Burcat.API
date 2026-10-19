@@ -33,6 +33,10 @@ namespace Burcat.API
         public BurcatIdentifier<Politeness>? Tolerance { get; set; }
 
         public bool IsEmailVerified { get; protected set; }
+        /// <summary>
+        /// Identifies the user as potentially undesired, preserving additional information for proper investigation.
+        /// </summary>
+        public bool IsUnderInvestigation { get; protected set; }
 
         public bool IsRealNameConfidential { get; set; }
         public bool IsBirthDayConfidential { get; set; }
@@ -116,6 +120,8 @@ namespace Burcat.API
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => false;
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => Identifier == member?.Value;
 
         public override object?[] GetBurcatConstructionValues() => [Email, Username];
@@ -137,6 +143,8 @@ namespace Burcat.API
 
         public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Icon, Name];

@@ -24,6 +24,8 @@ namespace Burcat.API.Market
         public Currency(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon) { Creator = creator; Name = name; Icon = icon; }
         public Currency(BurcatIdentifier<DevOps> creator, string name, BurcatIdentifier<Image> icon, string description) : this(creator, name, icon) { Description = description; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && (from s in InterfaceOptions.Provider.Get<DevOps>() where s == Creator && s.Member == member select true).Any();
         public override object?[] GetBurcatConstructionValues() => [Creator, Name, Icon];
     }
@@ -40,6 +42,8 @@ namespace Burcat.API.Market
 
         public CurrencyOwnership(BurcatIdentifier<Member> owner, BurcatIdentifier<Currency> currrency, int amount) { Owner = owner; Currency = currrency; Amount = amount; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
         public override object?[] GetBurcatConstructionValues() => [Owner, Currency, Amount];
     }

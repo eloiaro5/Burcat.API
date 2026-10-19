@@ -24,6 +24,8 @@ namespace Burcat.API.Market.Trading
         public Auction(BurcatIdentifier<IOwnership> madeOver, int amount) : this(madeOver, amount, null, null) {  }
         public Auction(BurcatIdentifier<IOwnership> madeOver, int amount, decimal? participationPrice = null, DateTime? endTime = null) { MadeOver = madeOver; Amount = amount; ParticipationPrice = participationPrice; EndTime = endTime; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && OwnershipQueries.TryFind(InterfaceOptions.Provider, MadeOver.Value)?.Owner == member;
         public override object?[] GetBurcatConstructionValues() => [MadeOver, Amount];
     }
@@ -41,6 +43,8 @@ namespace Burcat.API.Market.Trading
 
         public CurrencyParticipationPrice(Auction auction, Currency currency, int amount) { Auction = auction; Currency = currency; Amount = amount; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && InterfaceOptions.TryFind(Auction) is Auction auction && auction.ShouldManage(member);
         public override object?[] GetBurcatConstructionValues() => [Auction, Currency, Amount];
     }

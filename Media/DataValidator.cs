@@ -11,6 +11,10 @@ namespace Burcat.API
 {
     public static partial class DataValidator
     {
+        /// <summary>Prevents message content from being cleared while its owner is under investigation.</summary>
+        public static ValidationResult? ValidateMessageDeletion(IMessage message) => InterfaceOptions.Find(message.Owner).IsUnderInvestigation
+            ? new("Message information cannot be deleted while its owner is under investigation.") : ValidationResult.Success;
+
         public static ValidationResult? ValidateMessageComment(MessageComment comment)
         {
             if (comment.ResponseTo is not null && comment.ResponseTo.Value.Value == comment.Identifier) return new("Cannot respond to the same message.");
@@ -21,11 +25,18 @@ namespace Burcat.API
         }
         public static ValidationResult? ValidateRepostPost(RepostPost post)
         {
-            IPost target = PostQueries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The reposted post does not exist.");
+            if (post.Post is not BurcatIdentifier<IPost> original) return ValidateDeletedPost(post);
+
+            IPost target = PostQueries.TryFind(InterfaceOptions.Provider, original.Value) ?? throw new InvalidOperationException("The reposted post does not exist.");
             if (target.Politeness != post.Politeness) return new("The repost and the post reposted can't have distinct politenesses.");
             else return ValidationResult.Success;
         }
-        public static ValidationResult? ValidateImagePost(ImagePost post) => InterfaceOptions.Find(post.Image).Politeness != post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success;
+        public static ValidationResult? ValidateImagePost(ImagePost post) => post.Image is BurcatIdentifier<Image> image
+            ? InterfaceOptions.Find(image).Politeness != post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success
+            : ValidateDeletedPost(post);
+
+        private static ValidationResult? ValidateDeletedPost(IPost post) => post.Title == " " && post.Message == " " && post.Tags is null
+            ? ValidateMessageDeletion(post) : new("A post without its media or original post must have its content cleared.");
         public static ValidationResult? ValidatePostTags(string? tags)
         {
             if (tags is null) return ValidationResult.Success;

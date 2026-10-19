@@ -22,6 +22,8 @@ namespace Burcat.API.Market.Trading
 
         public Bid(BurcatIdentifier<Member> madeBy, BurcatIdentifier<Auction> madeTo, decimal amount, DateTime? madeIn = null) { MadeBy = madeBy; MadeTo = madeTo; Amount = amount; MadeIn = madeIn ?? DateTime.Now; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && MadeBy == member;
         public override object?[] GetBurcatConstructionValues() => [MadeBy, MadeTo, Amount, MadeIn];
     }
@@ -41,6 +43,8 @@ namespace Burcat.API.Market.Trading
 
 		public CurrencyBid(BurcatIdentifier<Member> madeBy, BurcatIdentifier<Auction> madeTo, BurcatIdentifier<Currency> madeWith, int amount, DateTime? madeIn) { MadeBy = madeBy; MadeTo = madeTo; MadeWith = madeWith; Amount = amount; MadeIn = madeIn ?? DateTime.Now; }
 
+        [NotBurcatInvokable]
+        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
         public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && MadeBy == member;
         public override object?[] GetBurcatConstructionValues() => [MadeBy, MadeTo, MadeWith, Amount, MadeIn];
     }
