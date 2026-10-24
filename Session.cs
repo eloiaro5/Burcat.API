@@ -14,7 +14,10 @@ namespace Burcat.API
     public abstract class Session : BurcatObject, IInterfaceObject
     {
         [AtomicAction]
-        public static Session? GetSession(string token) => (from s in InterfaceOptions.Provider.Get<Session>() where s.Token == token select s).FirstOrDefault();
+        public static Session? GetSession(string token) => (from s in InterfaceOptions.Provider.Get<Session>()
+            join owner in InterfaceOptions.Provider.Get<Member>() on (Guid)s.Owner equals owner.Identifier
+            where s.Token == token && !owner.IsBanned && (s.EndTime == null || s.EndTime > DateTime.Now)
+            select s).FirstOrDefault();
 
         public BurcatIdentifier<Member> Owner { get; }
         [Length(24, 24)]
@@ -26,7 +29,7 @@ namespace Burcat.API
 
         public abstract void Logout();
 
-        public bool ShouldCreate(BurcatIdentifier<Member>? member) => true;
+        public bool ShouldCreate(BurcatIdentifier<Member>? member) => InterfaceOptions.TryFind(Owner) is Member owner && !owner.IsBanned;
         public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
         [NotBurcatInvokable]
         public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);

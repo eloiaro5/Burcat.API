@@ -15,7 +15,7 @@ namespace Burcat.API.Development
 {
     [BurcatIdentity("f05a5af4-0b66-4450-b712-3c44442c88c1")]
     [BurcatUnique(nameof(Owner), nameof(Name))]
-    public class Application : BurcatObject, ICollaborative
+    public class Application : BurcatObject, ICollaborative, Burcat.API.System.IReport.IReportable
     {
         public BurcatIdentifier<DevOps> Owner { get; }
         [Length(4, 64)]

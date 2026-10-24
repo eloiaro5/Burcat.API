@@ -11,11 +11,28 @@ namespace Burcat.API
 {
     public static partial class DataValidator
     {
-        /// <summary>Prevents message content from being cleared while its owner is under investigation.</summary>
-        public static ValidationResult? ValidateMessageDeletion(IMessage message) => InterfaceOptions.Find(message.Owner).IsUnderInvestigation
-            ? new("Message information cannot be deleted while its owner is under investigation.") : ValidationResult.Success;
+        /// <summary>Requires a deletion record, an owner who is not under investigation, and removal of attached media files.</summary>
+        public static ValidationResult? ValidateMessageDeletion(IMessage message)
+        {
+            if (InterfaceOptions.Find(message.Owner).IsUnderInvestigation)
+                return new("Message information cannot be deleted while its owner is under investigation.");
 
-        public static ValidationResult? ValidateMessageComment(MessageComment comment)
+            if (!InterfaceOptions.Provider.Get<MessageDeletion>().Any(deletion => (Guid)deletion.Message == message.Identifier))
+                return new("A message deletion record must exist before its information can be deleted.");
+
+            return message switch
+            {
+                CommentMessage { Image: BurcatIdentifier<Image> image } when File.Exists(Path.Combine(Image.ImagesPath, $"{image.Value}.png"))
+                    => new("The attached image must be removed before the comment information can be deleted."),
+                CommentMessage { Video: BurcatIdentifier<Video> video } when File.Exists(Path.Combine(Video.VideosPath, $"{video.Value}.mp4"))
+                    => new("The attached video must be removed before the comment information can be deleted."),
+                PostImage { Image: BurcatIdentifier<Image> image } when File.Exists(Path.Combine(Image.ImagesPath, $"{image.Value}.png"))
+                    => new("The image must be removed before the post information can be deleted."),
+                _ => ValidationResult.Success
+            };
+        }
+
+        public static ValidationResult? ValidateMessageComment(CommentMessage comment)
         {
             if (comment.ResponseTo is not null && comment.ResponseTo.Value.Value == comment.Identifier) return new("Cannot respond to the same message.");
             else if (comment.Image is not null && comment.Video is not null) return new("Cannot create a comment with an image and a video attached.");
@@ -23,15 +40,13 @@ namespace Burcat.API
             else if (comment.Video is BurcatIdentifier<Video> video && InterfaceOptions.TryFind(video)?.Politeness != comment.Politeness) return new("Cannot create a comment where the comment and the video have distinct politenesses.");
             else return ValidationResult.Success;
         }
-        public static ValidationResult? ValidateRepostPost(RepostPost post)
+        public static ValidationResult? ValidateRepostPost(PostRepost post)
         {
-            if (post.Post is not BurcatIdentifier<IPost> original) return ValidateDeletedPost(post);
-
-            IPost target = PostQueries.TryFind(InterfaceOptions.Provider, original.Value) ?? throw new InvalidOperationException("The reposted post does not exist.");
+            IPost target = Queries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The reposted post does not exist.");
             if (target.Politeness != post.Politeness) return new("The repost and the post reposted can't have distinct politenesses.");
             else return ValidationResult.Success;
         }
-        public static ValidationResult? ValidateImagePost(ImagePost post) => post.Image is BurcatIdentifier<Image> image
+        public static ValidationResult? ValidateImagePost(PostImage post) => post.Image is BurcatIdentifier<Image> image
             ? InterfaceOptions.Find(image).Politeness != post.Politeness ? new("The image and the post can't have distinct politenesses.") : ValidationResult.Success
             : ValidateDeletedPost(post);
 
@@ -46,10 +61,10 @@ namespace Burcat.API
             else return ValidationResult.Success;
         }
 
-        public static ValidationResult? ValidateAdvertisementPost(AdvertisementPost post) => post.MaximumPoliteness is not null &&
+        public static ValidationResult? ValidateAdvertisementPost(MessageAdvertisement post) => post.MaximumPoliteness is not null &&
             (from p in InterfaceOptions.Provider.Get<Politeness>() where p == post.MaximumPoliteness select p).First()
             <
-            InterfaceOptions.Find((PostQueries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The advertised post does not exist.")).Politeness)
+            InterfaceOptions.Find((Queries.TryFind(InterfaceOptions.Provider, post.Post.Value) ?? throw new InvalidOperationException("The advertised post does not exist.")).Politeness)
             ? new("The maximum politeness needs to be null or, equal or over the post polinteness.") : ValidationResult.Success;
 
         public static ValidationResult? ValidatePostReactionReaction(string reaction)

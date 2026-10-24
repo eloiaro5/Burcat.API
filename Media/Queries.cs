@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 namespace Burcat.API.Media
 {
     /// <summary>Queries concrete post tables and combines their results after SQL filtering.</summary>
-    public static class PostQueries
+    public static class Queries
     {
         /// <summary>Returns matching posts, preserving their concrete types. Further enumeration operators run in memory.</summary>
         public static IEnumerable<IPost> Where(IBurcatQueryProvider provider, Expression<Func<IPost, bool>> predicate)
@@ -12,16 +12,16 @@ namespace Burcat.API.Media
             ArgumentNullException.ThrowIfNull(provider);
             ArgumentNullException.ThrowIfNull(predicate);
 
-            return Where<MessagePost>(provider, predicate).AsEnumerable()
-                .Concat<IPost>(Where<RepostPost>(provider, predicate))
-                .Concat(Where<ImagePost>(provider, predicate));
+            return Where<PostMessage>(provider, predicate).AsEnumerable()
+                .Concat<IPost>(Where<PostRepost>(provider, predicate))
+                .Concat(Where<PostImage>(provider, predicate));
         }
 
         /// <summary>Finds a post across its concrete tables, or returns null when absent.</summary>
         public static IPost? TryFind(IBurcatQueryProvider provider, Guid identifier)
-            => provider.Get<MessagePost>().FirstOrDefault(post => post.Identifier == identifier) as IPost
-                ?? provider.Get<RepostPost>().FirstOrDefault(post => post.Identifier == identifier) as IPost
-                ?? provider.Get<ImagePost>().FirstOrDefault(post => post.Identifier == identifier);
+            => provider.Get<PostMessage>().FirstOrDefault(post => post.Identifier == identifier) as IPost
+                ?? provider.Get<PostRepost>().FirstOrDefault(post => post.Identifier == identifier) as IPost
+                ?? provider.Get<PostImage>().FirstOrDefault(post => post.Identifier == identifier);
 
         private static IQueryable<TPost> Where<TPost>(IBurcatQueryProvider provider, Expression<Func<IPost, bool>> predicate) where TPost : BurcatObject, IPost
         {

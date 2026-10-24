@@ -14,8 +14,8 @@ namespace Burcat.API
         bool ShouldSelect(BurcatIdentifier<Member>? member) => false;
         [NotBurcatInvokable]
         bool ShouldManage(BurcatIdentifier<Member>? member);
-        /// <summary>Determines whether a member may delete this object. Defaults to its management permission.</summary>
+        /// <summary>Determines whether a member may delete this object. Deletion is denied unless explicitly permitted.</summary>
         [NotBurcatInvokable]
-        bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
+        bool ShouldDelete(BurcatIdentifier<Member>? member) => false;
     }
 }

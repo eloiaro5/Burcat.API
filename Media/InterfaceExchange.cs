@@ -48,10 +48,10 @@ namespace Burcat.API
         public Member Owner { get; }
         public IMessage Message { get; }
         public Politeness Politeness { get; }
-        public BurcatList<PostReaction> Reactions { get; }
+        public BurcatList<MessageReaction> Reactions { get; }
         public BurcatList<PostSearchResponse> Responses { get; }
 
-        public PostSearchResponse(Member owner, IMessage message, Politeness politeness, BurcatList<PostReaction> reactions, BurcatList<PostSearchResponse> responses) : base(Guid.Empty) { Owner = owner; Message = message; Politeness = politeness; Reactions = reactions; Responses = responses; }
+        public PostSearchResponse(Member owner, IMessage message, Politeness politeness, BurcatList<MessageReaction> reactions, BurcatList<PostSearchResponse> responses) : base(Guid.Empty) { Owner = owner; Message = message; Politeness = politeness; Reactions = reactions; Responses = responses; }
 
         public override object?[] GetBurcatConstructionValues() => [Owner, Message, Politeness, Reactions, Responses];
     }

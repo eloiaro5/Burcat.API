@@ -15,7 +15,8 @@ namespace Burcat.API
     [BurcatIdentity("b83de0f1-71b1-4fdc-9023-7605c87cc896")]
     [BurcatUnique(nameof(Email))]
     [BurcatUnique(nameof(Username))]
-    public abstract class Member : BurcatObject, IInterfaceObject, IPublisher, IProfile
+    [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateMemberModeration))]
+    public abstract class Member : BurcatObject, IInterfaceObject, IPublisher, IProfile, Burcat.API.System.IReport.IReportable
     {
         [AtomicAction]
         public static Member? GetMember(string username) => (from a in InterfaceOptions.Provider.Get<Member>() where a.Email == username || a.Username == username select a).FirstOrDefault();
@@ -37,6 +38,8 @@ namespace Burcat.API
         /// Identifies the user as potentially undesired, preserving additional information for proper investigation.
         /// </summary>
         public bool IsUnderInvestigation { get; protected set; }
+        /// <summary>Prevents authentication and session creation while set.</summary>
+        public bool IsBanned { get; protected set; }
 
         public bool IsRealNameConfidential { get; set; }
         public bool IsBirthDayConfidential { get; set; }
@@ -49,6 +52,16 @@ namespace Burcat.API
 
         public abstract Session? Login(string password);
         public abstract void LogoutAllSessions();
+
+        /// <summary>Changes investigation and ban status using an active moderator session. Banning revokes all sessions.</summary>
+        [AtomicAction]
+        public virtual void SetModerationStatus([BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateModeratorSession))] Session moderatorSession, bool underInvestigation, bool banned)
+        {
+            if (DataValidator.ValidateModeratorSession(moderatorSession) is ValidationResult error) throw new ValidationException(error.ErrorMessage);
+            IsUnderInvestigation = underInvestigation;
+            IsBanned = banned;
+            if (banned) LogoutAllSessions();
+        }
 
         /// <summary>Gets the follow relationship from this member to <paramref name="target" />, if one exists.</summary>
         [AtomicAction]
@@ -85,7 +98,7 @@ namespace Burcat.API
         public BurcatList<IPost> GetPosts()
         {
             Politeness tolerance = Tolerance is BurcatIdentifier<Politeness> tID ? InterfaceOptions.Find(tID) : Politeness.GetNewMaximum(this);
-            return [.. GetPosts<MessagePost>(tolerance).Concat<IPost>(GetPosts<RepostPost>(tolerance)).Concat(GetPosts<ImagePost>(tolerance)).Take(100)];
+            return [.. GetPosts<PostMessage>(tolerance).Concat<IPost>(GetPosts<PostRepost>(tolerance)).Concat(GetPosts<PostImage>(tolerance)).Take(100)];
         }
 
         private IEnumerable<TPost> GetPosts<TPost>(Politeness tolerance) where TPost : BurcatObject, IPost
@@ -108,7 +121,7 @@ namespace Burcat.API
                 from membership in provider.Get<FactionMembership>()
                 join role in provider.Get<FactionRole>() on (Guid?)membership.Role equals role.Identifier
                 join faction in provider.Get<Faction>() on (Guid)membership.Faction equals faction.Identifier
-                where membership.Member == this && role.CanPost
+                where membership.Member == this && role.Faction == membership.Faction
                 select faction;
 
             return (ListSet<Faction>)[.. ownedFactions
@@ -125,28 +138,5 @@ namespace Burcat.API
         public bool ShouldManage(BurcatIdentifier<Member>? member) => Identifier == member?.Value;
 
         public override object?[] GetBurcatConstructionValues() => [Email, Username];
-    }
-
-    [BurcatIdentity("a744e0b1-fe53-4e46-9f6e-18b9b109a9a1")]
-    [BurcatUnique(nameof(Owner), nameof(Name))]
-    [BurcatCustomValidation(typeof(DataValidator), nameof(DataValidator.ValidateIconography))]
-    public class MemberIconography : BurcatObject, IInterfaceObject, IIconography
-    {
-        public BurcatIdentifier<Member> Owner { get; }
-        public BurcatIdentifier<Image> Icon { get; }
-        [Length(1, 32)]
-        public string Name { get; set; }
-
-        BurcatIdentifier<IProfile> IIconography.Owner => Owner.Downcast<IProfile>();
-
-        public MemberIconography(BurcatIdentifier<Member> owner, BurcatIdentifier<Image> icon, [Length(1, 32)] string name) { Owner = owner; Icon = icon; Name = name; }
-
-        public bool ShouldCreate(BurcatIdentifier<Member>? member) => ShouldManage(member);
-        public bool ShouldSelect(BurcatIdentifier<Member>? member) => true;
-        [NotBurcatInvokable]
-        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && Owner == member;
-
-        public override object?[] GetBurcatConstructionValues() => [Owner, Icon, Name];
     }
 }

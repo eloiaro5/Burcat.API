@@ -1,4 +1,4 @@
-﻿using BurcatProtocol;
+using BurcatProtocol;
 using BurcatProtocol.Annotations;
 using Burcat.API.Media;
 using System;
@@ -24,12 +24,23 @@ namespace Burcat.API
     {
         /// <summary>Finds a message in its concrete comment or post table, or returns null when absent.</summary>
         public static IMessage? TryFindMessage(Guid identifier)
-            => Provider.Get<MessageComment>().FirstOrDefault(comment => comment.Identifier == identifier) as IMessage
-                ?? PostQueries.TryFind(Provider, identifier);
+            => Provider.Get<CommentMessage>().FirstOrDefault(comment => comment.Identifier == identifier) as IMessage
+                ?? Queries.TryFind(Provider, identifier);
 
         /// <summary>Finds a message in its concrete table; throws when the reference does not exist.</summary>
         public static IMessage FindMessage(BurcatIdentifier<IMessage> identifier)
             => TryFindMessage(identifier.Value) ?? throw new InvalidOperationException("The referenced message does not exist.");
+
+        /// <summary>Finds a reportable message, faction, member, or application in its concrete entity table.</summary>
+        public static Burcat.API.System.IReport.IReportable? TryFindReportable(Guid identifier)
+            => TryFindMessage(identifier) as Burcat.API.System.IReport.IReportable
+                ?? Provider.Get<Faction>().FirstOrDefault(faction => faction.Identifier == identifier) as Burcat.API.System.IReport.IReportable
+                ?? Provider.Get<Member>().FirstOrDefault(member => member.Identifier == identifier) as Burcat.API.System.IReport.IReportable
+                ?? Provider.Get<Burcat.API.Development.Application>().FirstOrDefault(application => application.Identifier == identifier);
+
+        /// <summary>Finds a report target, throwing when it no longer exists.</summary>
+        public static Burcat.API.System.IReport.IReportable FindReportable(BurcatIdentifier<Burcat.API.System.IReport.IReportable> identifier)
+            => TryFindReportable(identifier.Value) ?? throw new InvalidOperationException("The report target does not exist.");
 
         public static T? TryFind<T>(BurcatIdentifier<T> identifier) where T : class, IInterfaceObject => (from o in Provider.Get<T>() where o.Identifier == (Guid)identifier select o).FirstOrDefault();
         public static T Find<T>(BurcatIdentifier<T> identifier) where T : class, IInterfaceObject => (from o in Provider.Get<T>() where o.Identifier == (Guid)identifier select o).First();

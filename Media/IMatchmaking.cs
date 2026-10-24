@@ -11,53 +11,9 @@ namespace Burcat.API.Media
     public interface IMatchmaking : IInterfaceObject
     {
         BurcatIdentifier<IPublisher> Match { get; }
-        BurcatIdentifier<AdvertisementPost> Advertisement { get; }
+        BurcatIdentifier<MessageAdvertisement> Advertisement { get; }
         bool IsInclusive { get; set; }
     }
 
     public interface IPublisher : IInterfaceObject { }
-
-    [BurcatIdentity("d27073a2-755b-43fc-9dd6-015077d269dc")]
-    public class MemberMatchmaking : BurcatObject, IMatchmaking
-    {
-        public BurcatIdentifier<Member> Member { get; }
-        public BurcatIdentifier<AdvertisementPost> Advertisement { get; }
-        public bool IsInclusive { get; set; }
-
-        BurcatIdentifier<IPublisher> IMatchmaking.Match => Member.Downcast<IPublisher>();
-
-        public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement) { Member = member; Advertisement = advertisement; }
-        public MemberMatchmaking(BurcatIdentifier<Member> member, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(member, advertisement) { IsInclusive = isInclusive; }
-
-        [NotBurcatInvokable]
-        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && CanManageAdvertisement(Advertisement, member.Value);
-
-        internal static bool CanManageAdvertisement(BurcatIdentifier<AdvertisementPost> advertisement, BurcatIdentifier<Member> member)
-        {
-            AdvertisementPost? value = InterfaceOptions.TryFind(advertisement);
-            return value is not null && PostQueries.Where(InterfaceOptions.Provider, post => post.Identifier == value.Post.Value && (Guid)post.Owner == member.Value).Any();
-        }
-        public override object?[] GetBurcatConstructionValues() => [Member, Advertisement];
-    }
-
-    [BurcatIdentity("32f310a4-1d98-4905-bb3c-e58905300e3f")]
-    public class FactionMatchmaking : BurcatObject, IMatchmaking
-    {
-        public BurcatIdentifier<Faction> Faction { get; }
-        public BurcatIdentifier<AdvertisementPost> Advertisement { get; }
-        public bool IsInclusive { get; set; }
-        public bool IsRecursive { get; set; }
-
-        BurcatIdentifier<IPublisher> IMatchmaking.Match => Faction.Downcast<IPublisher>();
-
-        public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement) { Faction = faction; Advertisement = advertisement; }
-        public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive) : this(faction, advertisement) { IsInclusive = isInclusive; }
-        public FactionMatchmaking(BurcatIdentifier<Faction> faction, BurcatIdentifier<AdvertisementPost> advertisement, bool isInclusive, bool isRecursive) : this(faction, advertisement, isInclusive) { IsRecursive = isRecursive; }
-
-        [NotBurcatInvokable]
-        public bool ShouldDelete(BurcatIdentifier<Member>? member) => ShouldManage(member);
-        public bool ShouldManage(BurcatIdentifier<Member>? member) => member is not null && MemberMatchmaking.CanManageAdvertisement(Advertisement, member.Value);
-        public override object?[] GetBurcatConstructionValues() => [Faction, Advertisement];
-    }
 }

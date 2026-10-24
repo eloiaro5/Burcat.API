@@ -26,11 +26,10 @@ namespace Burcat.API
 
         public static ValidationResult? ValidateFactionRole(FactionRole role)
         {
-            if (!role.InitialRole)
+            if (role.InitialRole)
             {
-                int expected = InterfaceOptions.TryFind<FactionRole>(role) is null ? 0 : 1;
                 return InterfaceOptions.Provider.Get<FactionRole>()
-                .Count(existingRole => existingRole.Faction == role.Faction && existingRole.InitialRole) > expected
+                .Any(existingRole => existingRole.Faction == role.Faction && existingRole.InitialRole && existingRole.Identifier != role.Identifier)
                 ? new("Only one role per faction can be the initial role.") : ValidationResult.Success;
             }
             else return ValidationResult.Success;
